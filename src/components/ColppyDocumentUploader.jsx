@@ -2,45 +2,25 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Upload, FileText, Clock, CheckCircle, XCircle, AlertCircle, Eye, X, ExternalLink } from 'lucide-react';
 
 const ColppyDocumentUploader = () => {
-  // Variables de entorno
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const ADDONS_URL = import.meta.env.VITE_ADDONS_URL;
 
-  // Refs para cleanup
   const timeoutRefs = useRef([]);
   const intervalRef = useRef(null);
 
-  // Función para obtener cookies con validación
-  const getCookie = (name) => {
-    try {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) {
-        const cookieValue = parts.pop().split(';').shift();
-        return cookieValue?.trim() || null;
-      }
-      return null;
-    } catch (error) {
-      console.warn(`Error reading cookie ${name}:`, error);
-      return null;
-    }
-  };
+const username  = window.idUsuario ?? "";
+const password  = window.password ?? "";
+const empresaId = window.idEmpresaUsuario ?? 0;
 
-  // Verificar cookies de autenticación
-  const username = getCookie('loginUsernameCookie');
-  const password = getCookie('loginPasswordCookie');
-  const userId = getCookie('userIdCookie');
-  const cookiesAvailable = Boolean(username && password && userId);
+  const cookiesAvailable = Boolean(username && password && empresaId);
 
-  // Configuración solo si las cookies están disponibles
   const formData = cookiesAvailable ? {
     user: username,
     pass: password,
-    idEmpresa: userId,
+    idEmpresa: empresaId,
     endPoint: 'https://staging.colppy.com/lib/frontera2/service.php'
   } : null;
 
-  // Estados del componente
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
@@ -50,24 +30,14 @@ const ColppyDocumentUploader = () => {
   const [viewerOpen, setViewerOpen] = useState(false);
   const [currentDocument, setCurrentDocument] = useState(null);
   const [comprobantesInfo, setComprobantesInfo] = useState(null);
-  
-  // Estado consolidado del visor
-  const [viewerState, setViewerState] = useState({
-    loading: false,
-    error: false,
-    showAlternative: false
-  });
 
-  // Variable derivada para determinar si se puede subir
   const canUpload = cookiesAvailable && comprobantesInfo?.canProcessFacturas !== false;
 
-  // Función para limpiar timeouts
   const clearAllTimeouts = useCallback(() => {
     timeoutRefs.current.forEach(timeoutId => clearTimeout(timeoutId));
     timeoutRefs.current = [];
   }, []);
 
-  // Función para agregar timeout con cleanup automático
   const addTimeout = useCallback((callback, delay) => {
     const timeoutId = setTimeout(() => {
       callback();
@@ -77,13 +47,11 @@ const ColppyDocumentUploader = () => {
     return timeoutId;
   }, []);
 
-  // Función para mostrar mensaje con timeout automático
   const showMessage = useCallback((message, duration = 3000) => {
     setUploadMessage(message);
     addTimeout(() => setUploadMessage(''), duration);
   }, [addTimeout]);
 
-  // Función para verificar comprobantes disponibles
   const checkComprobantesDisponibles = useCallback(async () => {
     if (!cookiesAvailable || !formData?.idEmpresa) {
       setComprobantesInfo(null);
@@ -105,7 +73,6 @@ const ColppyDocumentUploader = () => {
     }
   }, [cookiesAvailable, formData?.idEmpresa, API_BASE_URL]);
 
-  // Función para cargar documentos desde la base de datos
   const loadDocuments = useCallback(async () => {
     if (!cookiesAvailable || !formData?.idEmpresa) {
       setLoading(false);
@@ -137,46 +104,20 @@ const ColppyDocumentUploader = () => {
     }
   }, [cookiesAvailable, formData?.idEmpresa, showMessage, API_BASE_URL]);
 
-  // Función para manejar la apertura del documento en el visor integrado
   const handleOpenDocument = useCallback((doc) => {
     setCurrentDocument(doc);
     setViewerOpen(true);
-    setViewerState({ loading: true, error: false, showAlternative: false });
-    showMessage('Cargando documento...', 1500);
-    
-    addTimeout(() => {
-      setViewerState(prev => ({ ...prev, loading: false }));
-      showMessage('Documento cargado correctamente', 2000);
-    }, 1500);
-  }, [showMessage, addTimeout]);
+    showMessage('Abriendo documento...');
+  }, [showMessage]);
 
-  // Función para cerrar el visor
   const handleCloseViewer = useCallback(() => {
     setViewerOpen(false);
     setCurrentDocument(null);
-    setViewerState({ loading: false, error: false, showAlternative: false });
   }, []);
 
-  // Función para manejar errores del iframe
-  const handleIframeError = useCallback(() => {
-    setViewerState(prev => ({
-      ...prev,
-      error: true,
-      showAlternative: true
-    }));
-    showMessage('No se puede mostrar en iframe debido a restricciones de seguridad');
-  }, [showMessage]);
-
-  // Función para mostrar visor alternativo
-  const handleShowAlternativeViewer = useCallback(() => {
-    setViewerState(prev => ({ ...prev, showAlternative: true }));
-    showMessage('Mostrando visor alternativo...');
-  }, [showMessage]);
-
-  // Función para abrir en nueva pestaña
   const handleOpenInNewTab = useCallback((url) => {
     try {
-      window.open(url, '_blank');
+      window.open(url, '_blank', 'noopener,noreferrer');
       showMessage('Documento abierto en nueva pestaña');
     } catch (error) {
       console.error('Error al abrir nueva pestaña:', error);
@@ -184,7 +125,6 @@ const ColppyDocumentUploader = () => {
     }
   }, [showMessage]);
 
-  // Función para convertir archivo a Base64
   const convertToBase64 = useCallback((file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -201,7 +141,6 @@ const ColppyDocumentUploader = () => {
     });
   }, []);
 
-  // Función para consultar el estado de un documento
   const checkDocumentStatus = useCallback(async (identifier) => {
     if (!identifier || identifier === 'Error - No disponible') {
       return null;
@@ -243,7 +182,6 @@ const ColppyDocumentUploader = () => {
     }
   }, [API_BASE_URL]);
 
-  // Función optimizada para actualizar estados de documentos
   const updateProcessingDocuments = useCallback(async () => {
     const processingDocs = documents.filter(doc => 
       doc.status === 'processing' && 
@@ -254,14 +192,12 @@ const ColppyDocumentUploader = () => {
     if (processingDocs.length === 0) return;
 
     try {
-      // Consultar todos los documentos en paralelo
       const statusPromises = processingDocs.map(doc => 
         checkDocumentStatus(doc.externalCode).then(result => ({ doc, result }))
       );
       
       const results = await Promise.allSettled(statusPromises);
       
-      // Procesar resultados
       const updates = results
         .filter(result => result.status === 'fulfilled' && result.value.result)
         .map(result => {
@@ -276,7 +212,6 @@ const ColppyDocumentUploader = () => {
           };
         });
 
-      // Aplicar actualizaciones si hay cambios
       if (updates.length > 0) {
         setDocuments(prev => 
           prev.map(doc => {
@@ -290,7 +225,6 @@ const ColppyDocumentUploader = () => {
     }
   }, [documents, checkDocumentStatus]);
 
-  // Función para subir documento - MODIFICADA para manejar error de comprobantes
   const uploadDocument = useCallback(async (file) => {
     if (!cookiesAvailable) {
       showMessage('Error: No se puede proceder sin cookies de autenticación válidas', 5000);
@@ -302,7 +236,6 @@ const ColppyDocumentUploader = () => {
       return false;
     }
 
-    // Verificar comprobantes antes de proceder
     if (comprobantesInfo && !comprobantesInfo.canProcessFacturas) {
       showMessage('Sin comprobantes disponibles en tu plan actual. Contacta con soporte para adquirir más comprobantes.', 8000);
       return false;
@@ -341,7 +274,6 @@ const ColppyDocumentUploader = () => {
       if (!response.ok) {
         const errorData = await response.text();
         
-        // Manejar específicamente el error de sin comprobantes
         if (errorData.includes('Sin comprobantes disponibles') || 
             errorData.includes('sin shots') || 
             errorData.includes('comprobantes restantes: 0')) {
@@ -353,9 +285,7 @@ const ColppyDocumentUploader = () => {
 
       const responseData = await response.json();
       
-      // Verificar si la subida fue exitosa
       if (!responseData.success) {
-        // Verificar si el error en la respuesta es sobre comprobantes
         if (responseData.message && 
             (responseData.message.includes('Sin comprobantes disponibles') ||
              responseData.message.includes('sin shots') ||
@@ -367,7 +297,6 @@ const ColppyDocumentUploader = () => {
 
       showMessage('Documento subido exitosamente - Procesando...', 3000);
       
-      // Recargar la lista de documentos y comprobantes desde la base de datos
       await loadDocuments();
       await checkComprobantesDisponibles();
       
@@ -375,9 +304,8 @@ const ColppyDocumentUploader = () => {
     } catch (error) {
       console.error('Error al subir documento:', error);
       
-      // Mostrar mensaje específico para error de comprobantes
       if (error.message.includes('Sin comprobantes disponibles')) {
-        showMessage(`❌ ${error.message}`, 8000);
+        showMessage(`Error: ${error.message}`, 8000);
       } else {
         showMessage(`Error: ${error.message}`, 5000);
       }
@@ -388,7 +316,6 @@ const ColppyDocumentUploader = () => {
     }
   }, [cookiesAvailable, formData, convertToBase64, showMessage, loadDocuments, checkComprobantesDisponibles, comprobantesInfo, API_BASE_URL]);
 
-  // Función para seleccionar archivo
   const handleFileSelect = useCallback((file) => {
     if (!canUpload) {
       if (!cookiesAvailable) {
@@ -413,7 +340,6 @@ const ColppyDocumentUploader = () => {
     showMessage(`Archivo seleccionado: ${file.name}`);
   }, [canUpload, cookiesAvailable, comprobantesInfo, showMessage]);
 
-  // Función para manejar la subida
   const handleUpload = useCallback(async () => {
     if (!canUpload) {
       if (!cookiesAvailable) {
@@ -432,7 +358,6 @@ const ColppyDocumentUploader = () => {
     await uploadDocument(selectedFile);
   }, [canUpload, cookiesAvailable, selectedFile, uploadDocument, showMessage]);
 
-  // Handlers para drag & drop
   const handleDragOver = useCallback((e) => {
     e.preventDefault();
     if (canUpload) setDragActive(true);
@@ -455,7 +380,6 @@ const ColppyDocumentUploader = () => {
     }
   }, [canUpload, handleFileSelect]);
 
-  // Funciones para obtener estado visual
   const getStatusIcon = (status) => {
     switch (status) {
       case 'processed':
@@ -491,22 +415,11 @@ const ColppyDocumentUploader = () => {
     }
   };
 
-  // Función para obtener hostname de forma segura
-  const getHostname = useCallback((url) => {
-    try {
-      return new URL(url).hostname;
-    } catch {
-      return 'URL inválida';
-    }
-  }, []);
-
-  // Effect para cargar documentos y comprobantes al inicializar
   useEffect(() => {
     loadDocuments();
     checkComprobantesDisponibles();
   }, [loadDocuments, checkComprobantesDisponibles]);
 
-  // Effect para configurar interval de consulta de estados
   useEffect(() => {
     intervalRef.current = setInterval(updateProcessingDocuments, 15000);
     return () => {
@@ -516,7 +429,6 @@ const ColppyDocumentUploader = () => {
     };
   }, [updateProcessingDocuments]);
 
-  // Effect para cleanup al desmontar
   useEffect(() => {
     return () => {
       clearAllTimeouts();
@@ -529,10 +441,9 @@ const ColppyDocumentUploader = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Mensaje de estado */}
         {uploadMessage && (
           <div className={`mb-6 p-4 rounded-lg ${
-            uploadMessage.includes('Error') || uploadMessage.includes('❌')
+            uploadMessage.includes('Error') || uploadMessage.includes('Error:')
               ? 'bg-red-50 border border-red-200 text-red-800'
               : uploadMessage.includes('exitosamente') || uploadMessage.includes('nueva pestaña') || uploadMessage.includes('correctamente')
               ? 'bg-green-50 border border-green-200 text-green-800'
@@ -541,7 +452,7 @@ const ColppyDocumentUploader = () => {
               : 'bg-blue-50 border border-blue-200 text-blue-800'
           }`}>
             <div className="flex items-center">
-              {uploadMessage.includes('Error') || uploadMessage.includes('❌')
+              {uploadMessage.includes('Error') || uploadMessage.includes('Error:')
                 ? <XCircle className="w-5 h-5 mr-2" />
                 : uploadMessage.includes('exitosamente') || uploadMessage.includes('nueva pestaña') || uploadMessage.includes('correctamente')
                 ? <CheckCircle className="w-5 h-5 mr-2" />
@@ -553,7 +464,6 @@ const ColppyDocumentUploader = () => {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Zona de carga */}
           <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
             <h2 className="text-xl font-semibold text-gray-800 mb-6 flex items-center">
               <Upload className="w-6 h-6 mr-2 text-blue-600" />
@@ -658,7 +568,6 @@ const ColppyDocumentUploader = () => {
               </div>
             </div>
 
-            {/* Estado del sistema y comprobantes */}
             <div className="mt-6 bg-gray-50 rounded-lg p-4">
               <div>
                 <p className="text-xs text-gray-600 mb-2">
@@ -685,7 +594,6 @@ const ColppyDocumentUploader = () => {
                       </div>
                     </div>
                     
-                    {/* Información de comprobantes disponibles */}
                     {comprobantesInfo && (
                       <div className={`text-xs mt-2 p-2 rounded border ${
                         comprobantesInfo.canProcessFacturas 
@@ -715,7 +623,6 @@ const ColppyDocumentUploader = () => {
             </div>
           </div>
 
-          {/* Lista de documentos */}
           <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
             <h2 className="text-xl font-semibold text-gray-800 mb-6 flex items-center justify-between">
               <span className="flex items-center">
@@ -786,8 +693,7 @@ const ColppyDocumentUploader = () => {
           </div>
         </div>
 
-        {/* Modal del visor de documentos */}
-        {viewerOpen && (
+        {viewerOpen && currentDocument && (
           <div className="fixed inset-0 z-50 overflow-hidden">
             <div className="absolute inset-0 bg-black bg-opacity-50" onClick={handleCloseViewer}></div>
             
@@ -798,15 +704,15 @@ const ColppyDocumentUploader = () => {
                     <FileText className="w-6 h-6 mr-3 text-blue-600" />
                     <div>
                       <h3 className="text-xl font-semibold text-gray-800">
-                        {currentDocument?.filename}
+                        {currentDocument.filename}
                       </h3>
                       <p className="text-sm text-gray-500">
-                        Código: {currentDocument?.externalCode}
+                        Código: {currentDocument.externalCode}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {currentDocument?.deeplink && (
+                    {currentDocument.deeplink && (
                       <button
                         onClick={() => handleOpenInNewTab(currentDocument.deeplink)}
                         className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
@@ -825,134 +731,27 @@ const ColppyDocumentUploader = () => {
                   </div>
                 </div>
 
-                <div className="flex-1 p-6 overflow-hidden">
-                  {viewerState.loading ? (
-                    <div className="h-full flex items-center justify-center">
+                <div className="flex-1 overflow-hidden">
+                  {currentDocument.deeplink ? (
+                    <iframe
+                      src={currentDocument.deeplink}
+                      className="w-full h-full"
+                      style={{ border: 'none', margin: 0, padding: 0 }}
+                      title={currentDocument.filename}
+                    />
+                  ) : (<div className="h-full flex items-center justify-center bg-gray-50">
                       <div className="text-center">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                        <p className="text-gray-600">Cargando documento...</p>
+                        <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                        <h4 className="text-lg font-medium text-gray-700 mb-2">
+                          Vista previa del documento
+                        </h4>
+                        <p className="text-gray-500 mb-4">
+                          {currentDocument.filename}
+                        </p>
+                        <p className="text-sm text-gray-400">
+                          El documento se mostraría aquí cuando esté disponible
+                        </p>
                       </div>
-                    </div>
-                  ) : (
-                    <div className="h-full border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 overflow-hidden">
-                      {currentDocument?.deeplink ? (
-                        <div className="h-full flex flex-col">
-                          <div className="bg-gray-100 border-b border-gray-200 p-3 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="flex items-center">
-                                <div className={`w-3 h-3 rounded-full mr-2 ${viewerState.error ? 'bg-red-500' : 'bg-green-500'}`}></div>
-                                <span className="text-sm text-gray-700">
-                                  {viewerState.error ? 'Iframe bloqueado' : 'Conectado'}
-                                </span>
-                              </div>
-                              <span className="text-xs text-gray-500 font-mono bg-gray-200 px-2 py-1 rounded">
-                                {getHostname(currentDocument.deeplink)}
-                              </span>
-                            </div>
-                            <div className="flex gap-2">
-                              {viewerState.error && (
-                                <button
-                                  onClick={handleShowAlternativeViewer}
-                                  className="text-xs bg-yellow-600 text-white px-3 py-1 rounded hover:bg-yellow-700 transition-colors"
-                                >
-                                  Visor alternativo
-                                </button>
-                              )}
-                              <button
-                                onClick={() => handleOpenInNewTab(currentDocument.deeplink)}
-                                className="text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition-colors flex items-center gap-1"
-                              >
-                                <ExternalLink className="w-3 h-3" />
-                                Abrir directamente
-                              </button>
-                            </div>
-                          </div>
-                          
-                          <div className="flex-1 relative">
-                            {viewerState.showAlternative || viewerState.error ? (
-                              <div className="h-full flex flex-col">
-                                <div className="bg-blue-50 border-b border-blue-200 p-3">
-                                  <div className="flex items-center">
-                                    <AlertCircle className="w-4 h-4 text-blue-600 mr-2" />
-                                    <span className="text-sm text-blue-800">
-                                      Visor alternativo - Las restricciones de seguridad impiden mostrar el iframe
-                                    </span>
-                                  </div>
-                                </div>
-                                <div className="flex-1 p-6 flex items-center justify-center">
-                                  <div className="text-center max-w-md">
-                                    <FileText className="w-20 h-20 text-blue-500 mx-auto mb-4" />
-                                    <h4 className="text-lg font-semibold text-gray-800 mb-3">
-                                      Documento disponible
-                                    </h4>
-                                    <p className="text-gray-600 mb-4">
-                                      El documento <strong>{currentDocument.filename}</strong> está listo para visualizar, 
-                                      pero requiere abrirse en una nueva ventana debido a las políticas de seguridad del sitio.
-                                    </p>
-                                    <div className="space-y-3">
-                                      <button
-                                        onClick={() => handleOpenInNewTab(currentDocument.deeplink)}
-                                        className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
-                                      >
-                                        <ExternalLink className="w-5 h-5" />
-                                        Abrir documento en nueva ventana
-                                      </button>
-                                      <p className="text-xs text-gray-500">
-                                        URL: {currentDocument.deeplink}
-                                      </p>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            ) : (
-                              <>
-                                <iframe
-                                  src={currentDocument.deeplink}
-                                  className="w-full h-full border-0"
-                                  title={`Visor de ${currentDocument.filename}`}
-                                  sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation"
-                                  onError={handleIframeError}
-                                  onLoad={(e) => {
-                                    try {
-                                      const iframeDoc = e.target.contentDocument;
-                                      if (!iframeDoc) {
-                                        console.log('Iframe cargado pero sin acceso al contenido');
-                                      } else {
-                                        const currentUrl = iframeDoc.location.href;
-                                        if (currentUrl.includes('signin') || currentUrl.includes('login')) {
-                                          handleIframeError();
-                                        }
-                                      }
-                                    } catch (error) {
-                                      console.log('Error de acceso al iframe:', error);
-                                    }
-                                  }}
-                                />
-                                
-                                <div 
-                                  className="absolute inset-0 pointer-events-none"
-                                  onError={handleIframeError}
-                                />
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="h-full flex items-center justify-center">
-                          <div className="text-center">
-                            <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                            <h4 className="text-lg font-medium text-gray-700 mb-2">
-                              Vista previa del documento
-                            </h4>
-                            <p className="text-gray-500 mb-4">
-                              {currentDocument?.filename}
-                            </p>
-                            <p className="text-sm text-gray-400">
-                              El documento se mostraría aquí cuando esté disponible
-                            </p>
-                          </div>
-                        </div>
-                      )}
                     </div>
                   )}
                 </div>
@@ -961,8 +760,8 @@ const ColppyDocumentUploader = () => {
                   <div className="flex items-center justify-between">
                     <div className="text-sm text-gray-600">
                       <span className="font-medium">Estado:</span>
-                      <span className={`ml-2 px-2 py-1 rounded-full text-xs ${getStatusColor(currentDocument?.status)}`}>
-                        {getStatusText(currentDocument?.status)}
+                      <span className={`ml-2 px-2 py-1 rounded-full text-xs ${getStatusColor(currentDocument.status)}`}>
+                        {getStatusText(currentDocument.status)}
                       </span>
                     </div>
                     <div className="flex gap-3">
@@ -972,7 +771,7 @@ const ColppyDocumentUploader = () => {
                       >
                         Cerrar
                       </button>
-                      {currentDocument?.deeplink && (
+                      {currentDocument.deeplink && (
                         <button
                           onClick={() => handleOpenInNewTab(currentDocument.deeplink)}
                           className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
