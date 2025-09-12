@@ -1,15 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Upload, FileText, Clock, CheckCircle, XCircle, AlertCircle, Eye, X, ExternalLink } from 'lucide-react';
 
-const ColppyDocumentUploader = ({ empresaId, getCookie }) => {
+const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const ADDONS_URL = import.meta.env.VITE_ADDONS_URL;
 
   const timeoutRefs = useRef([]);
   const intervalRef = useRef(null);
 
-  const username  = getCookie('token') ?? "";
-  const password  = getCookie('token') ?? "";
+  const username  = email ?? "";
+  const password  = getCookie('loginPasswordCookie') ?? "";
 
   const cookiesAvailable = Boolean(username && password && empresaId);
 
@@ -420,7 +420,7 @@ const ColppyDocumentUploader = ({ empresaId, getCookie }) => {
   }, [loadDocuments, checkComprobantesDisponibles]);
 
   useEffect(() => {
-    intervalRef.current = setInterval(updateProcessingDocuments, 15000);
+    intervalRef.current = setInterval(updateProcessingDocuments, 45000);
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -732,13 +732,16 @@ const ColppyDocumentUploader = ({ empresaId, getCookie }) => {
 
                 <div className="flex-1 overflow-hidden">
                   {currentDocument.deeplink ? (
-                    <iframe
-                      src={currentDocument.deeplink}
-                      className="w-full h-full"
-                      style={{ border: 'none', margin: 0, padding: 0 }}
-                      title={currentDocument.filename}
-                    />
-                  ) : (<div className="h-full flex items-center justify-center bg-gray-50">
+                  <iframe
+                    src={currentDocument.deeplink}
+                    className="w-full h-full"
+                    style={{ border: 'none', margin: 0, padding: 0 }}
+                    title={currentDocument.filename}
+                    onLoad={() => console.log('Iframe cargado exitosamente')}
+                    onError={() => console.log('Error cargando iframe')}
+                  />
+                  ) : (
+                    <div className="h-full flex items-center justify-center bg-gray-50">
                       <div className="text-center">
                         <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                         <h4 className="text-lg font-medium text-gray-700 mb-2">
