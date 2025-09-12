@@ -17,8 +17,6 @@ function App() {
     const fetchEmpresa = async () => {
       const token = getCookie('token');
 
-      debugger;
-
       const sRes = await fetch(`${API_BASE_URL}/auth/session-info`, {
         method: 'GET',
         headers: {

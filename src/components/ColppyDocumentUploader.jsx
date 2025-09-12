@@ -464,7 +464,7 @@ const ColppyDocumentUploader = ({ empresaId, getCookie }) => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <h2 className="text-xl font-semibold text-gray-800 mb-6 flex items-center">
+            <h2 className="text-xl font-semibold text-gray-800 mb-2 flex items-center">
               <Upload className="w-6 h-6 mr-2 text-blue-600" />
               Subir Documento
             </h2>
@@ -567,7 +567,7 @@ const ColppyDocumentUploader = ({ empresaId, getCookie }) => {
               </div>
             </div>
 
-            <div className="mt-6 bg-gray-50 rounded-lg p-4">
+            <div className="mt-2 bg-gray-50 rounded-lg p-4">
               <div>
                 <p className="text-xs text-gray-600 mb-2">
                   <strong>Estado del sistema:</strong>
