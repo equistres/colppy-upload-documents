@@ -1,16 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Upload, FileText, Clock, CheckCircle, XCircle, AlertCircle, Eye, X, ExternalLink } from 'lucide-react';
 
-const ColppyDocumentUploader = () => {
+const ColppyDocumentUploader = ({ empresaId, getCookie }) => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const ADDONS_URL = import.meta.env.VITE_ADDONS_URL;
 
   const timeoutRefs = useRef([]);
   const intervalRef = useRef(null);
 
-const username  = window.idUsuario ?? "";
-const password  = window.password ?? "";
-const empresaId = window.idEmpresaUsuario ?? 0;
+  const username  = getCookie('token') ?? "";
+  const password  = getCookie('token') ?? "";
 
   const cookiesAvailable = Boolean(username && password && empresaId);
 
