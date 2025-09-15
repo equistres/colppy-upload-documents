@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Upload, FileText, Clock, CheckCircle, XCircle, AlertCircle, Eye, X, ExternalLink } from 'lucide-react';
-import DocumentViewer from './DocumentViewer'; // Importa el componente minimalista
 
 const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -693,12 +692,103 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
           </div>
         </div>
 
-        {/* Usando el componente DocumentViewer minimalista */}
-        <DocumentViewer 
-          document={currentDocument}
-          isOpen={viewerOpen}
-          onClose={handleCloseViewer}
-        />
+        {viewerOpen && currentDocument && (
+          <div className="fixed inset-0 z-50 overflow-hidden">
+            <div className="absolute inset-0 bg-black bg-opacity-50" onClick={handleCloseViewer}></div>
+            
+            <div className="relative h-full flex items-center justify-center p-4">
+              <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl h-full max-h-[90vh] flex flex-col">
+                <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                  <div className="flex items-center">
+                    <FileText className="w-6 h-6 mr-3 text-blue-600" />
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-800">
+                        {currentDocument.filename}
+                      </h3>
+                      <p className="text-sm text-gray-500">
+                        Código: {currentDocument.externalCode}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {currentDocument.deeplink && (
+                      <button
+                        onClick={() => handleOpenInNewTab(currentDocument.deeplink)}
+                        className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        title="Abrir en nueva pestaña"
+                      >
+                        <ExternalLink className="w-5 h-5" />
+                      </button>
+                    )}
+                    <button
+                      onClick={handleCloseViewer}
+                      className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Cerrar"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex-1 overflow-hidden">
+                  {currentDocument.deeplink ? (
+                  <iframe
+                    src={currentDocument.deeplink}
+                    className="w-full h-full"
+                    style={{ border: 'none', margin: 0, padding: 0 }}
+                    title={currentDocument.filename}
+                    onLoad={() => console.log('Iframe cargado exitosamente')}
+                    onError={() => console.log('Error cargando iframe')}
+                  />
+                  ) : (
+                    <div className="h-full flex items-center justify-center bg-gray-50">
+                      <div className="text-center">
+                        <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                        <h4 className="text-lg font-medium text-gray-700 mb-2">
+                          Vista previa del documento
+                        </h4>
+                        <p className="text-gray-500 mb-4">
+                          {currentDocument.filename}
+                        </p>
+                        <p className="text-sm text-gray-400">
+                          El documento se mostraría aquí cuando esté disponible
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="p-6 border-t border-gray-200 bg-gray-50">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-600">
+                      <span className="font-medium">Estado:</span>
+                      <span className={`ml-2 px-2 py-1 rounded-full text-xs ${getStatusColor(currentDocument.status)}`}>
+                        {getStatusText(currentDocument.status)}
+                      </span>
+                    </div>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={handleCloseViewer}
+                        className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
+                      >
+                        Cerrar
+                      </button>
+                      {currentDocument.deeplink && (
+                        <button
+                          onClick={() => handleOpenInNewTab(currentDocument.deeplink)}
+                          className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                          Abrir en nueva pestaña
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
