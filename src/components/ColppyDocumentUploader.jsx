@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Upload, FileText, Clock, CheckCircle, XCircle, AlertCircle, Eye, X, ExternalLink } from 'lucide-react';
-import DocumentViewer from './DocumentViewer'; // Importa el componente minimalista
+import DocumentViewer from './DocumentViewer';
 
 const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -115,16 +115,6 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
     setCurrentDocument(null);
   }, []);
 
-  const handleOpenInNewTab = useCallback((url) => {
-    try {
-      window.open(url, '_blank', 'noopener,noreferrer');
-      showMessage('Documento abierto en nueva pestaña');
-    } catch (error) {
-      console.error('Error al abrir nueva pestaña:', error);
-      showMessage('Error al abrir el documento en nueva pestaña');
-    }
-  }, [showMessage]);
-
   const convertToBase64 = useCallback((file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -141,6 +131,7 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
     });
   }, []);
 
+  // FUNCIÓN ACTUALIZADA: Ahora usa State en lugar de Process
   const checkDocumentStatus = useCallback(async (identifier) => {
     if (!identifier || identifier === 'Error - No disponible') {
       return null;
@@ -167,8 +158,8 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
           const docInfo = parsedResponse[0];
           return {
             identifier: docInfo.Identifier,
-            state: docInfo.State,
-            process: docInfo.Process,
+            state: docInfo.State,          // ← Usar State como campo principal
+            process: docInfo.Process,      // ← Mantener Process por compatibilidad
             filename: docInfo.Filename,
             deeplink: docInfo.Deeplink,
             fullData: docInfo
@@ -182,6 +173,7 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
     }
   }, [API_BASE_URL]);
 
+  // FUNCIÓN ACTUALIZADA: Ahora evalúa State en lugar de Process
   const updateProcessingDocuments = useCallback(async () => {
     const processingDocs = documents.filter(doc => 
       doc.status === 'processing' && 
@@ -202,10 +194,37 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
         .filter(result => result.status === 'fulfilled' && result.value.result)
         .map(result => {
           const { doc, result: statusInfo } = result.value;
+          
+          // CAMBIO PRINCIPAL: Evaluar State en lugar de Process
+          let newStatus = doc.status;
+          const state = statusInfo.state?.toLowerCase();
+          
+          switch (state) {
+            case 'completed':
+              newStatus = 'processed';
+              break;
+            case 'rejected':
+              newStatus = 'error';
+              break;
+            case 'processing':
+            case 'uploaded':
+              newStatus = 'processing';
+              break;
+            case 'pending':
+              newStatus = 'pending';
+              break;
+            default:
+              // Fallback a Process si State no es reconocido
+              if (statusInfo.process?.toLowerCase() === 'finished') {
+                newStatus = 'processed';
+              }
+              break;
+          }
+          
           return {
             docId: doc.id,
             updates: {
-              ...(statusInfo.process === 'Finished' && { status: 'processed' }),
+              ...(newStatus !== doc.status && { status: newStatus }),
               statusInfo,
               deeplink: statusInfo.deeplink
             }
@@ -693,7 +712,6 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
           </div>
         </div>
 
-        {/* Usando el componente DocumentViewer minimalista */}
         <DocumentViewer 
           document={currentDocument}
           isOpen={viewerOpen}
