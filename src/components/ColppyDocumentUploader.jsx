@@ -31,7 +31,7 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
   const [currentDocument, setCurrentDocument] = useState(null);
   const [comprobantesInfo, setComprobantesInfo] = useState(null);
 
-  const canUpload = cookiesAvailable && comprobantesInfo?.canProcessFacturas !== false;
+  const canUpload = cookiesAvailable && comprobantesInfo?.canProcessFacturas !== false && comprobantesInfo?.comprobantes_restantes > 0;
 
   const clearAllTimeouts = useCallback(() => {
     timeoutRefs.current.forEach(timeoutId => clearTimeout(timeoutId));
@@ -514,14 +514,14 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
                         : 'No tienes comprobantes disponibles en tu plan actual'
                       }
                     </p>
-                    {!cookiesAvailable ? null : comprobantesInfo && (comprobantesInfo.comprobantes_restantes === 0 || !comprobantesInfo.canProcessFacturas) ? (
+                    {cookiesAvailable && (
                       <button
                         onClick={() => window.open(ADDONS_URL, '_blank')}
                         className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
                       >
                         Comprar más comprobantes
                       </button>
-                    ) : null}
+                    )}
                   </>
                 ) : (
                   <>
