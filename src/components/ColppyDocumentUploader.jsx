@@ -293,7 +293,7 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
       if (!response.ok) {
         const errorData = await response.text();
         
-        if (errorData.includes('Sin comprobantes disponibles') || 
+        if (errorData.includes('Sin creditos disponibles') || 
             errorData.includes('sin shots') || 
             errorData.includes('comprobantes restantes: 0')) {
           throw new Error('Sin comprobantes disponibles en tu plan actual. Contacta con soporte para adquirir más comprobantes.');
@@ -511,7 +511,7 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
                     <p className="text-base text-red-600 mb-4">
                       {!cookiesAvailable 
                         ? 'Se requiere de autenticación para subir documentos'
-                        : 'No tienes comprobantes disponibles en tu plan actual'
+                        : ''
                       }
                     </p>
                     {cookiesAvailable && (
@@ -519,7 +519,7 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
                         onClick={() => window.open(ADDONS_URL, '_self')}
                         className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
                       >
-                        Comprar más comprobantes
+                        Comprar más creditos
                       </button>
                     )}
                   </>
@@ -589,9 +589,6 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
 
             <div className="mt-2 bg-gray-50 rounded-lg p-4">
               <div>
-                <p className="text-xs text-gray-600 mb-2">
-                  <strong>Estado del sistema:</strong>
-                </p>
                 {!cookiesAvailable && (
                   <div className="text-xs text-red-600 mt-2 bg-red-50 p-2 rounded border border-red-200">
                     <div className="flex items-center">
@@ -604,14 +601,6 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
                 )}
                 {cookiesAvailable && (
                   <>
-                    <div className="text-xs text-green-600 mt-2 bg-green-50 p-2 rounded border border-green-200">
-                      <div className="flex items-center">
-                        <CheckCircle className="w-3 h-3 mr-2" />
-                        <span className="font-medium">
-                          Sistema listo para subir documentos
-                        </span>
-                      </div>
-                    </div>
                     
                     {comprobantesInfo && (
                       <div className={`text-xs mt-2 p-2 rounded border ${
@@ -623,11 +612,6 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
                           <span className="font-medium">
                             Comprobantes disponibles: {comprobantesInfo.comprobantes_restantes || 0}
                           </span>
-                          {!comprobantesInfo.canProcessFacturas && (
-                            <span className="text-xs bg-orange-200 px-2 py-1 rounded">
-                              Sin comprobantes
-                            </span>
-                          )}
                         </div>
                         {comprobantesInfo.comprobantes_comprados && (
                           <div className="text-xs text-gray-500 mt-1">
