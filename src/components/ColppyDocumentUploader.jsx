@@ -15,7 +15,12 @@ const STATE_MAPPING = {
   rejected: DOCUMENT_STATUS.ERROR,
   processing: DOCUMENT_STATUS.PROCESSING,
   uploaded: DOCUMENT_STATUS.PROCESSING,
-  pending: DOCUMENT_STATUS.PENDING
+  pending: DOCUMENT_STATUS.PENDING,
+  finished: DOCUMENT_STATUS.PROCESSED,
+  done: DOCUMENT_STATUS.PROCESSED,
+  success: DOCUMENT_STATUS.PROCESSED,
+  error: DOCUMENT_STATUS.ERROR,
+  failed: DOCUMENT_STATUS.ERROR
 };
 
 const MESSAGE_TYPES = {
@@ -31,7 +36,7 @@ const FILE_CONSTRAINTS = {
 
 const TIMEOUTS = {
   MESSAGE_DURATION: 3000,
-  POLLING_INTERVAL: 45000,
+  POLLING_INTERVAL: 10000, // Reducido de 45s a 10s para debug
   INIT_DELAY: 1000
 };
 
@@ -183,9 +188,10 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
   const { message: uploadMessage, showMessage } = useMessage(timeoutManager);
 
   // Memoized values
+  const password = useMemo(() => getCookie('loginPasswordCookie') ?? "", [getCookie]);
+
   const authData = useMemo(() => {
     const username = email ?? "";
-    const password = getCookie('loginPasswordCookie') ?? "";
     const cookiesAvailable = Boolean(username && password && empresaId);
 
     return {
@@ -199,7 +205,7 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
         endPoint: 'https://staging.colppy.com/lib/frontera2/service.php'
       } : null
     };
-  }, [email, getCookie, empresaId]);
+  }, [email, password, empresaId]);
 
   const canUpload = useMemo(() =>
     authData.cookiesAvailable &&
@@ -213,15 +219,24 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
     [initialLoadComplete, authData.cookiesAvailable, comprobantesInfo]
   );
 
+  const hasProcessingDocs = useMemo(() =>
+    documents.some(doc =>
+      doc.status === DOCUMENT_STATUS.PROCESSING &&
+      doc.externalCode &&
+      doc.externalCode !== 'Error - No disponible'
+    ),
+    [documents]
+  );
+
   // API functions
   const checkComprobantesDisponibles = useCallback(async () => {
-    if (!authData.cookiesAvailable || !authData.formData?.idEmpresa) {
+    if (!authData.cookiesAvailable || !empresaId) {
       setComprobantesInfo(null);
       return;
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/facturas/comprobantes/${authData.formData.idEmpresa}`);
+      const response = await fetch(`${API_BASE_URL}/api/facturas/comprobantes/${empresaId}`);
       if (response.ok) {
         const data = await response.json();
         setComprobantesInfo(data);
@@ -233,16 +248,16 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
       console.error('Error verificando comprobantes:', error);
       setComprobantesInfo(null);
     }
-  }, [authData.cookiesAvailable, authData.formData?.idEmpresa, API_BASE_URL]);
+  }, [authData.cookiesAvailable, empresaId, API_BASE_URL]);
 
   const loadDocuments = useCallback(async () => {
-    if (!authData.cookiesAvailable || !authData.formData?.idEmpresa) {
+    if (!authData.cookiesAvailable || !empresaId) {
       setLoading(false);
       return;
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/facturas/empresa/${authData.formData.idEmpresa}`, {
+      const response = await fetch(`${API_BASE_URL}/api/facturas/empresa/${empresaId}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }
       });
@@ -257,92 +272,109 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
     } finally {
       setLoading(false);
     }
-  }, [authData.cookiesAvailable, authData.formData?.idEmpresa, showMessage, API_BASE_URL]);
+  }, [authData.cookiesAvailable, empresaId, showMessage, API_BASE_URL]);
 
-  const checkDocumentStatus = useCallback(async (identifier) => {
-    if (!identifier || identifier === 'Error - No disponible') return null;
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/documents/getinfo`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ identifier })
-      });
-
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-      const responseData = await response.json();
-
-      if (responseData.response) {
-        const parsedResponse = JSON.parse(responseData.response);
-        if (parsedResponse?.length > 0) {
-          const docInfo = parsedResponse[0];
-          return {
-            identifier: docInfo.Identifier,
-            state: docInfo.State,
-            process: docInfo.Process,
-            filename: docInfo.Filename,
-            deeplink: docInfo.Deeplink,
-            fullData: docInfo
-          };
-        }
-      }
-      return null;
-    } catch (error) {
-      console.error('Error al consultar estado del documento:', error);
-      return null;
-    }
-  }, [API_BASE_URL]);
 
   const updateProcessingDocuments = useCallback(async () => {
-    const processingDocs = documents.filter(doc =>
-      doc.status === DOCUMENT_STATUS.PROCESSING &&
-      doc.externalCode &&
-      doc.externalCode !== 'Error - No disponible'
-    );
-
-    if (processingDocs.length === 0) return;
-
-    try {
-      const statusPromises = processingDocs.map(doc =>
-        checkDocumentStatus(doc.externalCode).then(result => ({ doc, result }))
+    setDocuments(currentDocs => {
+      const processingDocs = currentDocs.filter(doc =>
+        doc.status === DOCUMENT_STATUS.PROCESSING &&
+        doc.externalCode &&
+        doc.externalCode !== 'Error - No disponible'
       );
 
-      const results = await Promise.allSettled(statusPromises);
+      if (processingDocs.length === 0) return currentDocs;
 
-      const updates = results
-        .filter(result => result.status === 'fulfilled' && result.value.result)
-        .map(result => {
-          const { doc, result: statusInfo } = result.value;
+      // Actualizar estados de forma asíncrona sin depender del estado actual
+      (async () => {
+        try {
+          const checkStatus = async (identifier) => {
+            if (!identifier || identifier === 'Error - No disponible') return null;
 
-          let newStatus = doc.status;
-          const state = statusInfo.state?.toLowerCase();
+            try {
+              const response = await fetch(`${API_BASE_URL}/api/documents/getinfo`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ identifier })
+              });
 
-          newStatus = STATE_MAPPING[state] ||
-            (statusInfo.process?.toLowerCase() === 'finished' ? DOCUMENT_STATUS.PROCESSED : newStatus);
+              if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-          return {
-            docId: doc.id,
-            updates: {
-              ...(newStatus !== doc.status && { status: newStatus }),
-              statusInfo,
-              deeplink: statusInfo.deeplink
+              const responseData = await response.json();
+
+              if (responseData.response) {
+                const parsedResponse = JSON.parse(responseData.response);
+                if (parsedResponse?.length > 0) {
+                  const docInfo = parsedResponse[0];
+                  return {
+                    identifier: docInfo.Identifier,
+                    state: docInfo.State,
+                    process: docInfo.Process,
+                    filename: docInfo.Filename,
+                    deeplink: docInfo.Deeplink,
+                    fullData: docInfo
+                  };
+                }
+              }
+              return null;
+            } catch (error) {
+              console.error('Error al consultar estado del documento:', error);
+              return null;
             }
           };
-        });
 
-      if (updates.length > 0) {
-        setDocuments(prev =>
-          prev.map(doc => {
-            const update = updates.find(u => u.docId === doc.id);
-            return update ? { ...doc, ...update.updates } : doc;
-          })
-        );
-      }
-    } catch (error) {
-      console.error('Error actualizando estados de documentos:', error);
-    }
-  }, [documents, checkDocumentStatus]);
+          const statusPromises = processingDocs.map(doc =>
+            checkStatus(doc.externalCode).then(result => ({ doc, result }))
+          );
+
+          const results = await Promise.allSettled(statusPromises);
+
+          const updates = results
+            .filter(result => result.status === 'fulfilled' && result.value.result)
+            .map(result => {
+              const { doc, result: statusInfo } = result.value;
+
+              let newStatus = doc.status;
+              const state = statusInfo.state?.toLowerCase();
+              const process = statusInfo.process?.toLowerCase();
+
+              // Priorizar el estado sobre el proceso
+              if (STATE_MAPPING[state]) {
+                newStatus = STATE_MAPPING[state];
+              } else if (STATE_MAPPING[process]) {
+                newStatus = STATE_MAPPING[process];
+              } else if (process === 'finished' || process === 'done') {
+                newStatus = DOCUMENT_STATUS.PROCESSED;
+              } else if (process === 'failed' || state === 'error') {
+                newStatus = DOCUMENT_STATUS.ERROR;
+              }
+
+              return {
+                docId: doc.id,
+                updates: {
+                  status: newStatus,
+                  statusInfo,
+                  deeplink: statusInfo.deeplink
+                }
+              };
+            });
+
+          if (updates.length > 0) {
+            setDocuments(prev =>
+              prev.map(doc => {
+                const update = updates.find(u => u.docId === doc.id);
+                return update ? { ...doc, ...update.updates } : doc;
+              })
+            );
+          }
+        } catch (error) {
+          console.error('Error actualizando estados de documentos:', error);
+        }
+      })();
+
+      return currentDocs;
+    });
+  }, [API_BASE_URL]);
 
   const uploadDocument = useCallback(async (file) => {
     if (!authData.cookiesAvailable || !authData.formData) {
@@ -414,7 +446,7 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
       setIsUploading(false);
       setSelectedFile(null);
     }
-  }, [authData, convertToBase64, showMessage, loadDocuments, checkComprobantesDisponibles, comprobantesInfo, API_BASE_URL]);
+  }, [authData.cookiesAvailable, authData.formData, convertToBase64, showMessage, loadDocuments, checkComprobantesDisponibles, comprobantesInfo, API_BASE_URL]);
 
   // Event handlers
   const handleFileSelect = useCallback((file) => {
@@ -493,14 +525,26 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
     };
 
     initialize();
-  }, [loadDocuments, checkComprobantesDisponibles]);
+  }, [empresaId, authData.cookiesAvailable]);
 
   useEffect(() => {
-    intervalRef.current = setInterval(updateProcessingDocuments, TIMEOUTS.POLLING_INTERVAL);
+    // Limpiar interval anterior si existe
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+
+    // Solo crear interval si hay documentos en procesamiento
+    if (hasProcessingDocs) {
+      intervalRef.current = setInterval(updateProcessingDocuments, TIMEOUTS.POLLING_INTERVAL);
+    }
+
     return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
     };
-  }, [updateProcessingDocuments]);
+  }, [hasProcessingDocs, updateProcessingDocuments]);
 
   useEffect(() => {
     return () => {
