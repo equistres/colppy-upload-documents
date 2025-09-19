@@ -508,8 +508,7 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
   const handleOpenDocument = useCallback((doc) => {
     setCurrentDocument(doc);
     setViewerOpen(true);
-    showMessage('Abriendo documento...');
-  }, [showMessage]);
+  }, []);
 
   const handleCloseViewer = useCallback(() => {
     setViewerOpen(false);
