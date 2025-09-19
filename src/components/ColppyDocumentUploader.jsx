@@ -506,7 +506,7 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
                   <>
                     <XCircle className="w-20 h-20 mb-6 text-red-400" />
                     <h3 className="text-xl font-medium text-red-700 mb-3">
-                      {!cookiesAvailable ? 'Acceso requerido' : 'Sin comprobantes disponibles'}
+                      {!cookiesAvailable ? 'Acceso requerido' : 'Sin creditos disponibles'}
                     </h3>
                     <p className="text-base text-red-600 mb-4">
                       {!cookiesAvailable 
@@ -610,7 +610,7 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
                       }`}>
                         <div className="flex items-center justify-between">
                           <span className="font-medium">
-                            Comprobantes disponibles: {comprobantesInfo.comprobantes_restantes || 0}
+                            Creditos disponibles: {comprobantesInfo.comprobantes_restantes || 0}
                           </span>
                         </div>
                         {comprobantesInfo.comprobantes_comprados && (
