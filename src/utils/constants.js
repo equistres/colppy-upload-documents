@@ -1,0 +1,25 @@
+export const DOCUMENT_STATUS = {
+  PROCESSED: 'processed',
+  PROCESSING: 'processing',
+  ERROR: 'error',
+  PENDING: 'pending'
+};
+
+export const STATE_MAPPING = {
+  completed: DOCUMENT_STATUS.PROCESSED,
+  rejected: DOCUMENT_STATUS.ERROR,
+  processing: DOCUMENT_STATUS.PROCESSING,
+  uploaded: DOCUMENT_STATUS.PROCESSING,
+  pending: DOCUMENT_STATUS.PENDING,
+  finished: DOCUMENT_STATUS.PROCESSED,
+  done: DOCUMENT_STATUS.PROCESSED,
+  success: DOCUMENT_STATUS.PROCESSED,
+  error: DOCUMENT_STATUS.ERROR,
+  failed: DOCUMENT_STATUS.ERROR
+};
+
+export const TIMEOUTS = {
+  MESSAGE_DURATION: 3000,
+  POLLING_INTERVAL: 10000, // Reducido de 45s a 10s para debug
+  INIT_DELAY: 1000
+};
