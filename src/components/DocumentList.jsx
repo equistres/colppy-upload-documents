@@ -26,7 +26,7 @@ const DocumentList = ({ documents, onOpenDocument }) => {
     <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
       <h2 className="text-xl font-semibold text-gray-800 mb-6 flex items-center justify-between">
         <span className="flex items-center">
-          <FileText className="w-6 h-6 mr-2 text-blue-600" />
+          <FileText className="w-6 h-6 mr-2 text-colppy" />
           Documentos Recientes
         </span>
         <span className="text-sm font-normal text-gray-500">

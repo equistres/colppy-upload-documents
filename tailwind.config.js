@@ -7,8 +7,9 @@ export default {
   theme: {
     extend: {
       colors: {
-        'colppy-blue': '#1e40af',
-        'colppy-light-blue': '#3b82f6',
+        'colppy': '#6633cc',
+        'colppy-hover': '#5229a3',
+        'colppy-light': '#8855dd',
       }
     },
   },
