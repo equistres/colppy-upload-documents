@@ -16,7 +16,7 @@ const getMessageStyles = (type) => {
   const styles = {
     [MESSAGE_TYPES.ERROR]: 'bg-red-50 border border-red-200 text-red-800',
     [MESSAGE_TYPES.SUCCESS]: 'bg-green-50 border border-green-200 text-green-800',
-    [MESSAGE_TYPES.INFO]: 'bg-blue-50 border border-blue-200 text-blue-800'
+    [MESSAGE_TYPES.INFO]: 'bg-purple-50 border border-purple-200 text-purple-800'
   };
   return styles[type] || styles[MESSAGE_TYPES.INFO];
 };

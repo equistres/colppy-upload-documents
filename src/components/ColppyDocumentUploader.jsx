@@ -357,10 +357,32 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center min-h-[60vh]">
-            <div className="animate-spin rounded-full h-20 w-20 border-b-2 border-blue-600 mb-6"></div>
-            <h3 className="text-xl font-medium text-gray-700 mb-3">Inicializando...</h3>
-            <p className="text-base text-gray-500">Verificando acceso y créditos disponibles</p>
+          <div style={{
+            minHeight: '60vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+          }}>
+            <div style={{
+              background: 'white',
+              padding: '3rem',
+              borderRadius: '12px',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+              textAlign: 'center'
+            }}>
+              <div style={{
+                width: '32px',
+                height: '32px',
+                border: '3px solid #e5e7eb',
+                borderTop: '3px solid #6633cc',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite',
+                margin: '0 auto 1rem'
+              }}></div>
+              <p style={{ color: '#6b7280', margin: 0, fontSize: '16px' }}>Inicializando...</p>
+            </div>
+            <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
           </div>
         ) : (
           <>

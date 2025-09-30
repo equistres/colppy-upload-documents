@@ -69,7 +69,7 @@ const DocumentItem = ({ document, onOpenDocument }) => {
           {document.deeplink && (
             <button
               onClick={() => onOpenDocument(document)}
-              className="ml-2 p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors"
+              className="ml-2 p-1 text-colppy hover:text-colppy-hover hover:bg-purple-50 rounded transition-colors"
               title="Ver documento procesado"
             >
               <Eye className="w-4 h-4" />

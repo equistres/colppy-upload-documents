@@ -113,7 +113,7 @@ const UploadArea = ({
               </button>
               <button
                 onClick={() => window.open(addonsUrl, '_self')}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                className="px-6 py-3 bg-colppy text-white rounded-lg hover:bg-colppy-hover transition-colors font-medium"
               >
                 Obtener más créditos
               </button>
@@ -126,7 +126,7 @@ const UploadArea = ({
     return (
       <>
         <FileText className={`w-20 h-20 mb-6 transition-colors ${
-          dragActive ? 'text-blue-500' : selectedFile ? 'text-green-500' : 'text-gray-400'
+          dragActive ? 'text-colppy' : selectedFile ? 'text-green-500' : 'text-gray-400'
         }`} />
 
         {selectedFile ? (
@@ -164,7 +164,7 @@ const UploadArea = ({
             <button
               onClick={handleUpload}
               disabled={isUploading}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+              className="px-6 py-3 bg-colppy text-white rounded-lg hover:bg-colppy-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
             >
               {isUploading ? 'Subiendo...' : 'Subir documento'}
             </button>
@@ -177,7 +177,7 @@ const UploadArea = ({
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
       <h2 className="text-xl font-semibold text-gray-800 mb-2 flex items-center">
-        <Upload className="w-6 h-6 mr-2 text-blue-600" />
+        <Upload className="w-6 h-6 mr-2 text-colppy" />
         Subir Documento
       </h2>
 
@@ -186,7 +186,7 @@ const UploadArea = ({
           !canUpload
             ? 'border-red-300 bg-red-50 opacity-60'
             : dragActive
-            ? 'border-blue-500 bg-blue-50'
+            ? 'border-colppy bg-purple-50'
             : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
         } ${isUploading ? 'pointer-events-none opacity-50' : ''}`}
         onDragOver={handleDragOver}
@@ -213,7 +213,7 @@ const UploadArea = ({
           {authData.cookiesAvailable && comprobantesInfo && (
             <div className={`text-xs mt-2 p-2 rounded border ${
               comprobantesInfo.canProcessFacturas
-                ? 'bg-blue-50 border-blue-200 text-blue-700'
+                ? 'bg-purple-50 border-purple-200 text-purple-700'
                 : 'bg-orange-50 border-orange-200 text-orange-700'
             }`}>
               <div className="flex items-center justify-between">
