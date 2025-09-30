@@ -59,6 +59,11 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
   );
 
   const isLoading = useMemo(() => {
+    // Si empresaId o email aún no están disponibles, seguir cargando
+    if (!empresaId || !email) {
+      return true;
+    }
+
     // Si no hay cookies disponibles, no necesitamos esperar más validaciones
     if (!authData.cookiesAvailable) {
       return loading || !initialLoadComplete;
@@ -66,7 +71,7 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
 
     // Si hay cookies, debemos esperar a que se carguen todas las validaciones
     return loading || !initialLoadComplete || comprobantesInfo === null;
-  }, [loading, initialLoadComplete, authData.cookiesAvailable, comprobantesInfo]);
+  }, [loading, initialLoadComplete, authData.cookiesAvailable, comprobantesInfo, empresaId, email]);
 
   const hasProcessingDocs = useMemo(() =>
     documents.some(doc =>
@@ -351,32 +356,40 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
-        <MessageDisplay message={uploadMessage} />
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center min-h-[60vh]">
+            <div className="animate-spin rounded-full h-20 w-20 border-b-2 border-blue-600 mb-6"></div>
+            <h3 className="text-xl font-medium text-gray-700 mb-3">Inicializando...</h3>
+            <p className="text-base text-gray-500">Verificando acceso y créditos disponibles</p>
+          </div>
+        ) : (
+          <>
+            <MessageDisplay message={uploadMessage} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <UploadArea
-            canUpload={canUpload}
-            isLoading={isLoading}
-            isUploading={isUploading}
-            authData={authData}
-            comprobantesInfo={comprobantesInfo}
-            addonsUrl={ADDONS_URL}
-            onUpload={uploadDocument}
-            showMessage={showMessage}
-          />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <UploadArea
+                canUpload={canUpload}
+                isUploading={isUploading}
+                authData={authData}
+                comprobantesInfo={comprobantesInfo}
+                addonsUrl={ADDONS_URL}
+                onUpload={uploadDocument}
+                showMessage={showMessage}
+              />
 
-          <DocumentList
-            documents={documents}
-            loading={loading}
-            onOpenDocument={handleOpenDocument}
-          />
-        </div>
+              <DocumentList
+                documents={documents}
+                onOpenDocument={handleOpenDocument}
+              />
+            </div>
 
-        <DocumentViewer
-          document={currentDocument}
-          isOpen={viewerOpen}
-          onClose={handleCloseViewer}
-        />
+            <DocumentViewer
+              document={currentDocument}
+              isOpen={viewerOpen}
+              onClose={handleCloseViewer}
+            />
+          </>
+        )}
       </div>
     </div>
   );

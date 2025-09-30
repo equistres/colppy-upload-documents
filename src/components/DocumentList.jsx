@@ -1,17 +1,8 @@
 import { FileText } from 'lucide-react';
 import DocumentItem from './DocumentItem';
 
-const DocumentList = ({ documents, loading, onOpenDocument }) => {
+const DocumentList = ({ documents, onOpenDocument }) => {
   const renderContent = () => {
-    if (loading) {
-      return (
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando documentos...</p>
-        </div>
-      );
-    }
-
     if (documents.length > 0) {
       return documents.map(doc => (
         <DocumentItem
