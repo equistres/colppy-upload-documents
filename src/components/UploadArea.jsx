@@ -20,7 +20,6 @@ const formatFileSize = (bytes) => Math.round(bytes / 1024);
 
 const UploadArea = ({
   canUpload,
-  isLoading,
   isUploading,
   authData,
   comprobantesInfo,
@@ -91,16 +90,6 @@ const UploadArea = ({
   }, [canUpload, handleFileSelect]);
 
   const renderUploadContent = () => {
-    if (isLoading) {
-      return (
-        <>
-          <div className="animate-spin rounded-full h-20 w-20 border-b-2 border-blue-600 mb-6"></div>
-          <h3 className="text-xl font-medium text-gray-700 mb-3">Inicializando...</h3>
-          <p className="text-base text-gray-500">Verificando acceso y créditos disponibles</p>
-        </>
-      );
-    }
-
     if (!canUpload) {
       return (
         <>
@@ -194,9 +183,7 @@ const UploadArea = ({
 
       <div
         className={`border-2 border-dashed rounded-lg p-12 text-center transition-all duration-200 ${
-          isLoading
-            ? 'border-gray-300 bg-gray-50'
-            : !canUpload
+          !canUpload
             ? 'border-red-300 bg-red-50 opacity-60'
             : dragActive
             ? 'border-blue-500 bg-blue-50'
@@ -223,7 +210,7 @@ const UploadArea = ({
               </div>
             </div>
           )}
-          {authData.cookiesAvailable && !isLoading && comprobantesInfo && (
+          {authData.cookiesAvailable && comprobantesInfo && (
             <div className={`text-xs mt-2 p-2 rounded border ${
               comprobantesInfo.canProcessFacturas
                 ? 'bg-blue-50 border-blue-200 text-blue-700'
