@@ -282,9 +282,9 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
         throw new Error('La API no confirmó una subida exitosa');
       }
 
-      showMessage('Documento subido exitosamente - Procesando...', TIMEOUTS.MESSAGE_DURATION);
-
       await Promise.all([loadDocuments(), checkComprobantesDisponibles()]);
+
+      showMessage('Documento subido exitosamente - Procesando...', TIMEOUTS.MESSAGE_DURATION);
 
       return true;
     } catch (error) {
