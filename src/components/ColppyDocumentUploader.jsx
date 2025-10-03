@@ -34,7 +34,8 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
 
   // Memoized values
   const password = useMemo(() => getCookie('loginPasswordCookie') ?? "", [getCookie]);
-
+  debugger;
+  console.log('password', password);
   const authData = useMemo(() => {
     const username = email ?? "";
     const cookiesAvailable = Boolean(username && password && empresaId);
@@ -198,12 +199,22 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
           const { doc, result: statusInfo } = result.value;
 
           let newStatus = doc.status;
+          let errorMessage = null;
           const state = statusInfo.state?.toLowerCase();
           const process = statusInfo.process?.toLowerCase();
 
           // Verificar si hay reglas que fallaron
           const rules = statusInfo.fullData?.Rules || [];
-          const hasFailedRules = rules.some(rule => rule.Pass === false);
+          const failedRules = rules.filter(rule => rule.Pass === false);
+          const hasFailedRules = failedRules.length > 0;
+
+          // Si hay reglas fallidas, construir mensaje de error
+          if (hasFailedRules) {
+            const failedRulesText = failedRules
+              .map(rule => rule.Leyend || rule.Name)
+              .join(', ');
+            errorMessage = `Error en validación: ${failedRulesText}`;
+          }
 
           // Priorizar el estado sobre el proceso
           if (STATE_MAPPING[state]) {
@@ -227,7 +238,8 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
             updates: {
               status: newStatus,
               statusInfo,
-              deeplink: statusInfo.deeplink
+              deeplink: statusInfo.deeplink,
+              error: errorMessage || doc.error // Preservar error anterior si no hay nuevo
             }
           };
         });
