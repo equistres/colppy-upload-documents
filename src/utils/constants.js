@@ -20,6 +20,6 @@ export const STATE_MAPPING = {
 
 export const TIMEOUTS = {
   MESSAGE_DURATION: 3000,
-  POLLING_INTERVAL: 10000, // Reducido de 45s a 10s para debug
+  POLLING_INTERVAL: 30000,
   INIT_DELAY: 1000
 };

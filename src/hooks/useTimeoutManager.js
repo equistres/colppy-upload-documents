@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useMemo } from 'react';
 
 const useTimeoutManager = () => {
   const timeoutRefs = useRef([]);
@@ -12,12 +12,17 @@ const useTimeoutManager = () => {
     return timeoutId;
   }, []);
 
+  const clearTimeoutById = useCallback((timeoutId) => {
+    clearTimeout(timeoutId);
+    timeoutRefs.current = timeoutRefs.current.filter(id => id !== timeoutId);
+  }, []);
+
   const clearAllTimeouts = useCallback(() => {
     timeoutRefs.current.forEach(timeoutId => clearTimeout(timeoutId));
     timeoutRefs.current = [];
   }, []);
 
-  return { addTimeout, clearAllTimeouts };
+  return useMemo(() => ({ addTimeout, clearTimeoutById, clearAllTimeouts }), [addTimeout, clearTimeoutById, clearAllTimeouts]);
 };
 
 export default useTimeoutManager;
