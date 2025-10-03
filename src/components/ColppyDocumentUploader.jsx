@@ -26,10 +26,11 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
 
   // Refs
   const intervalRef = useRef(null);
+  const isCheckingStatusRef = useRef(false);
 
   // Custom hooks
   const timeoutManager = useTimeoutManager();
-  const { message: uploadMessage, showMessage } = useMessage(timeoutManager);
+  const { message: uploadMessage, showMessage } = useMessage();
 
   // Memoized values
   const password = useMemo(() => getCookie('loginPasswordCookie') ?? "", [getCookie]);
@@ -127,104 +128,123 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
 
 
   const updateProcessingDocuments = useCallback(async () => {
-    setDocuments(currentDocs => {
-      const processingDocs = currentDocs.filter(doc =>
-        doc.status === DOCUMENT_STATUS.PROCESSING &&
-        doc.externalCode &&
-        doc.externalCode !== 'Error - No disponible'
+    // Prevenir llamadas simultáneas
+    if (isCheckingStatusRef.current) {
+      return;
+    }
+
+    isCheckingStatusRef.current = true;
+
+    try {
+      // Obtener documentos del estado actual sin dependencias
+      let processingDocs = [];
+      setDocuments(current => {
+        processingDocs = current.filter(doc =>
+          doc.status === DOCUMENT_STATUS.PROCESSING &&
+          doc.externalCode &&
+          doc.externalCode !== 'Error - No disponible'
+        );
+        return current;
+      });
+
+      if (processingDocs.length === 0) {
+        return;
+      }
+
+      const checkStatus = async (identifier) => {
+        if (!identifier || identifier === 'Error - No disponible') return null;
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/documents/getinfo`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ identifier })
+          });
+
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+          const responseData = await response.json();
+
+          if (responseData.response) {
+            const parsedResponse = JSON.parse(responseData.response);
+            if (parsedResponse?.length > 0) {
+              const docInfo = parsedResponse[0];
+              return {
+                identifier: docInfo.Identifier,
+                state: docInfo.State,
+                process: docInfo.Process,
+                filename: docInfo.Filename,
+                deeplink: docInfo.Deeplink,
+                fullData: docInfo
+              };
+            }
+          }
+          return null;
+        } catch (error) {
+          console.error('Error al consultar estado del documento:', error);
+          return null;
+        }
+      };
+
+      const statusPromises = processingDocs.map(doc =>
+        checkStatus(doc.externalCode).then(result => ({ doc, result }))
       );
 
-      if (processingDocs.length === 0) return currentDocs;
+      const results = await Promise.allSettled(statusPromises);
 
-      // Actualizar estados de forma asíncrona sin depender del estado actual
-      (async () => {
-        try {
-          const checkStatus = async (identifier) => {
-            if (!identifier || identifier === 'Error - No disponible') return null;
+      const updates = results
+        .filter(result => result.status === 'fulfilled' && result.value.result)
+        .map(result => {
+          const { doc, result: statusInfo } = result.value;
 
-            try {
-              const response = await fetch(`${API_BASE_URL}/api/documents/getinfo`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ identifier })
-              });
+          let newStatus = doc.status;
+          const state = statusInfo.state?.toLowerCase();
+          const process = statusInfo.process?.toLowerCase();
 
-              if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          // Verificar si hay reglas que fallaron
+          const rules = statusInfo.fullData?.Rules || [];
+          const hasFailedRules = rules.some(rule => rule.Pass === false);
 
-              const responseData = await response.json();
+          // Priorizar el estado sobre el proceso
+          if (STATE_MAPPING[state]) {
+            newStatus = STATE_MAPPING[state];
+          } else if (STATE_MAPPING[process]) {
+            newStatus = STATE_MAPPING[process];
+          } else if (process === 'finished' || process === 'done') {
+            // Solo marcar como procesado si no hay reglas fallidas
+            newStatus = hasFailedRules ? DOCUMENT_STATUS.ERROR : DOCUMENT_STATUS.PROCESSED;
+          } else if (process === 'failed' || state === 'error') {
+            newStatus = DOCUMENT_STATUS.ERROR;
+          }
 
-              if (responseData.response) {
-                const parsedResponse = JSON.parse(responseData.response);
-                if (parsedResponse?.length > 0) {
-                  const docInfo = parsedResponse[0];
-                  return {
-                    identifier: docInfo.Identifier,
-                    state: docInfo.State,
-                    process: docInfo.Process,
-                    filename: docInfo.Filename,
-                    deeplink: docInfo.Deeplink,
-                    fullData: docInfo
-                  };
-                }
-              }
-              return null;
-            } catch (error) {
-              console.error('Error al consultar estado del documento:', error);
-              return null;
+          // Si hay reglas fallidas, forzar estado de error
+          if (hasFailedRules && newStatus === DOCUMENT_STATUS.PROCESSED) {
+            newStatus = DOCUMENT_STATUS.ERROR;
+          }
+
+          return {
+            docId: doc.id,
+            updates: {
+              status: newStatus,
+              statusInfo,
+              deeplink: statusInfo.deeplink
             }
           };
+        });
 
-          const statusPromises = processingDocs.map(doc =>
-            checkStatus(doc.externalCode).then(result => ({ doc, result }))
-          );
-
-          const results = await Promise.allSettled(statusPromises);
-
-          const updates = results
-            .filter(result => result.status === 'fulfilled' && result.value.result)
-            .map(result => {
-              const { doc, result: statusInfo } = result.value;
-
-              let newStatus = doc.status;
-              const state = statusInfo.state?.toLowerCase();
-              const process = statusInfo.process?.toLowerCase();
-
-              // Priorizar el estado sobre el proceso
-              if (STATE_MAPPING[state]) {
-                newStatus = STATE_MAPPING[state];
-              } else if (STATE_MAPPING[process]) {
-                newStatus = STATE_MAPPING[process];
-              } else if (process === 'finished' || process === 'done') {
-                newStatus = DOCUMENT_STATUS.PROCESSED;
-              } else if (process === 'failed' || state === 'error') {
-                newStatus = DOCUMENT_STATUS.ERROR;
-              }
-
-              return {
-                docId: doc.id,
-                updates: {
-                  status: newStatus,
-                  statusInfo,
-                  deeplink: statusInfo.deeplink
-                }
-              };
-            });
-
-          if (updates.length > 0) {
-            setDocuments(prev =>
-              prev.map(doc => {
-                const update = updates.find(u => u.docId === doc.id);
-                return update ? { ...doc, ...update.updates } : doc;
-              })
-            );
-          }
-        } catch (error) {
-          console.error('Error actualizando estados de documentos:', error);
-        }
-      })();
-
-      return currentDocs;
-    });
+      if (updates.length > 0) {
+        setDocuments(prev =>
+          prev.map(doc => {
+            const update = updates.find(u => u.docId === doc.id);
+            return update ? { ...doc, ...update.updates } : doc;
+          })
+        );
+      }
+    } catch (error) {
+      console.error('Error actualizando estados de documentos:', error);
+    } finally {
+      isCheckingStatusRef.current = false;
+    }
   }, [API_BASE_URL]);
 
   const uploadDocument = useCallback(async (file) => {
@@ -282,9 +302,9 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
         throw new Error('La API no confirmó una subida exitosa');
       }
 
-      showMessage('Documento subido exitosamente - Procesando...', TIMEOUTS.MESSAGE_DURATION);
-
       await Promise.all([loadDocuments(), checkComprobantesDisponibles()]);
+
+      showMessage('Documento subido exitosamente - Procesando...', TIMEOUTS.MESSAGE_DURATION);
 
       return true;
     } catch (error) {

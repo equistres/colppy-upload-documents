@@ -1,16 +1,38 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 
 const TIMEOUTS = {
   MESSAGE_DURATION: 3000
 };
 
-const useMessage = (timeoutManager) => {
+const useMessage = () => {
   const [message, setMessage] = useState('');
+  const timeoutRef = useRef(null);
 
   const showMessage = useCallback((text, duration = TIMEOUTS.MESSAGE_DURATION) => {
+    // Limpiar timeout anterior
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
     setMessage(text);
-    timeoutManager.addTimeout(() => setMessage(''), duration);
-  }, [timeoutManager]);
+
+    // Crear nuevo timeout si hay texto
+    if (text) {
+      timeoutRef.current = setTimeout(() => {
+        setMessage('');
+        timeoutRef.current = null;
+      }, duration);
+    }
+  }, []);
+
+  // Cleanup al desmontar
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   return { message, showMessage };
 };
