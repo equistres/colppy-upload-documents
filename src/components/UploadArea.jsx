@@ -75,6 +75,15 @@ const UploadArea = ({
 
     const success = await onUpload(selectedFile);
     if (success) {
+      // Track successful upload
+      if (typeof window.trackEvent !== 'undefined') {
+        window.trackEvent('Boolfy - Archivo Subido', {
+          'filename': selectedFile.name,
+          'file_size_kb': formatFileSize(selectedFile.size),
+          'file_type': selectedFile.type,
+          'fecha': new Date().toISOString()
+        });
+      }
       setSelectedFile(null);
     }
   }, [canUpload, authData.cookiesAvailable, selectedFile, onUpload, showMessage]);
