@@ -48,6 +48,22 @@ const formatDate = (dateString) => {
 const DocumentItem = ({ document, onOpenDocument }) => {
   const { date, time } = formatDate(document.uploadDate);
 
+  const handleViewDocument = () => {
+    // Track view document event
+    if (typeof window.trackEvent !== 'undefined') {
+      window.trackEvent('Boolfy - Ver Detalle Click', {
+        'document_id': document.id,
+        'filename': document.filename,
+        'external_code': document.externalCode,
+        'status': document.status,
+        'has_deeplink': Boolean(document.deeplink),
+        'has_error': Boolean(document.error),
+        'fecha': new Date().toISOString()
+      });
+    }
+    onOpenDocument(document);
+  };
+
   return (
     <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-gray-50">
       <div className="flex items-start justify-between">
@@ -68,7 +84,7 @@ const DocumentItem = ({ document, onOpenDocument }) => {
           </span>
           {document.deeplink && (
             <button
-              onClick={() => onOpenDocument(document)}
+              onClick={handleViewDocument}
               className="ml-2 p-1 text-colppy hover:text-colppy-hover hover:bg-purple-50 rounded transition-colors"
               title="Ver documento procesado"
             >

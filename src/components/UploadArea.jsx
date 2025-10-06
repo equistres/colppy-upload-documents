@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Upload, FileText, XCircle } from 'lucide-react';
 
 const FILE_CONSTRAINTS = {
@@ -47,6 +47,16 @@ const UploadArea = ({
 
     setSelectedFile(file);
     showMessage(`Archivo seleccionado: ${file.name}`);
+
+    // Track file selection event
+    if (typeof window.trackEvent !== 'undefined') {
+      window.trackEvent('Boolfy - Archivo Seleccionado', {
+        'filename': file.name,
+        'file_size_kb': formatFileSize(file.size),
+        'file_type': file.type,
+        'fecha': new Date().toISOString()
+      });
+    }
   }, [canUpload, authData.cookiesAvailable, showMessage]);
 
   const handleUpload = useCallback(async () => {
@@ -88,6 +98,20 @@ const UploadArea = ({
     const files = e.dataTransfer.files;
     if (files?.[0]) handleFileSelect(files[0]);
   }, [canUpload, handleFileSelect]);
+
+  // Track when credits info is displayed
+  useEffect(() => {
+    if (authData.cookiesAvailable && comprobantesInfo) {
+      if (typeof window.trackEvent !== 'undefined') {
+        window.trackEvent('Boolfy - Visualización de Créditos', {
+          'creditos_disponibles': comprobantesInfo.comprobantes_restantes || 0,
+          'creditos_totales': comprobantesInfo.comprobantes_comprados || 0,
+          'puede_procesar': comprobantesInfo.canProcessFacturas,
+          'fecha': new Date().toISOString()
+        });
+      }
+    }
+  }, [authData.cookiesAvailable, comprobantesInfo]);
 
   const renderUploadContent = () => {
     if (!canUpload) {
