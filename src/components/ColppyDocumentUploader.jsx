@@ -34,8 +34,6 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
 
   // Memoized values
   const password = useMemo(() => getCookie('loginPasswordCookie') ?? "", [getCookie]);
-  debugger;
-  console.log('password', password);
   const authData = useMemo(() => {
     const username = email ?? "";
     const cookiesAvailable = Boolean(username && password && empresaId);
@@ -46,7 +44,7 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
       cookiesAvailable,
       formData: cookiesAvailable ? {
         user: username,
-        pass: password,
+        claveSesion: password,
         idEmpresa: empresaId,
         endPoint: 'https://staging.colppy.com/lib/frontera2/service.php'
       } : null
