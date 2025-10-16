@@ -44,7 +44,7 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
       cookiesAvailable,
       formData: cookiesAvailable ? {
         user: username,
-        claveSesion: password,
+        pass: password,
         idEmpresa: empresaId,
         endPoint: 'https://staging.colppy.com/lib/frontera2/service.php'
       } : null
