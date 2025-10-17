@@ -281,6 +281,8 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
         bag: JSON.stringify(authData.formData)
       };
 
+      console.log('Datos enviados en bag:', authData.formData);
+
       showMessage('Enviando documento a la API...');
 
       const response = await fetch(`${API_BASE_URL}/api/documents/upload`, {
