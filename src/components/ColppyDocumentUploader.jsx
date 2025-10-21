@@ -216,8 +216,8 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
           }
 
           // Determinar estado basándose en la combinación State + Process
-          if (state === 'draft' && process === 'sent') {
-            // Draft + Sent = Procesado (verificar reglas)
+          if (state === 'draft' && (process === 'sent' || process === 'finished')) {
+            // Draft + Sent/Finished = Procesado (verificar reglas)
             newStatus = hasFailedRules ? DOCUMENT_STATUS.ERROR : DOCUMENT_STATUS.PROCESSED;
           } else if (state === 'aproved' && process === 'finished') {
             // Aproved + Finished = Procesado (verificar reglas)
