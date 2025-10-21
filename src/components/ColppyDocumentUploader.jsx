@@ -210,24 +210,31 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
           if (hasFailedRules) {
             const failedRulesText = failedRules
               .map(rule => rule.Leyend || rule.Name)
-              .join(', ');
-            errorMessage = `Error en validación: ${failedRulesText}`;
+              .filter(Boolean)
+              .join('; ');
+            errorMessage = `Errores de validación: ${failedRulesText}`;
           }
 
-          // Priorizar el estado sobre el proceso
-          if (STATE_MAPPING[state]) {
+          // Determinar estado basándose en la combinación State + Process
+          if (state === 'draft' && process === 'sent') {
+            // Draft + Sent = Procesado (verificar reglas)
+            newStatus = hasFailedRules ? DOCUMENT_STATUS.ERROR : DOCUMENT_STATUS.PROCESSED;
+          } else if (state === 'aproved' && process === 'finished') {
+            // Aproved + Finished = Procesado (verificar reglas)
+            newStatus = hasFailedRules ? DOCUMENT_STATUS.ERROR : DOCUMENT_STATUS.PROCESSED;
+          } else if (state === 'rejected') {
+            // Rechazado explícitamente
+            newStatus = DOCUMENT_STATUS.ERROR;
+          } else if (STATE_MAPPING[state]) {
+            // Mapeo directo por State
             newStatus = STATE_MAPPING[state];
           } else if (STATE_MAPPING[process]) {
+            // Mapeo directo por Process (fallback)
             newStatus = STATE_MAPPING[process];
-          } else if (process === 'finished' || process === 'done') {
-            // Solo marcar como procesado si no hay reglas fallidas
-            newStatus = hasFailedRules ? DOCUMENT_STATUS.ERROR : DOCUMENT_STATUS.PROCESSED;
-          } else if (process === 'failed' || state === 'error') {
-            newStatus = DOCUMENT_STATUS.ERROR;
           }
 
-          // Si hay reglas fallidas, forzar estado de error
-          if (hasFailedRules && newStatus === DOCUMENT_STATUS.PROCESSED) {
+          // Si hay reglas fallidas, siempre forzar estado de error
+          if (hasFailedRules) {
             newStatus = DOCUMENT_STATUS.ERROR;
           }
 
@@ -280,8 +287,6 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
         filename: file.name,
         bag: JSON.stringify(authData.formData)
       };
-
-      console.log('Datos enviados en bag:', authData.formData);
 
       showMessage('Enviando documento a la API...');
 
