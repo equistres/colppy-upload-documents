@@ -104,7 +104,7 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
     }
   }, [authData.cookiesAvailable, empresaId, API_BASE_URL]);
 
-  const loadDocuments = useCallback(async () => {
+  const loadDocuments = useCallback(async (mergeWithCurrent = false) => {
     if (!authData.cookiesAvailable || !empresaId) {
       return;
     }
@@ -118,7 +118,38 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
       const data = await response.json();
-      if (data.facturas) setDocuments(data.facturas);
+      if (data.facturas) {
+        if (mergeWithCurrent) {
+          // Merge inteligente: preservar estados locales de documentos que no son PROCESSING
+          setDocuments(prevDocs => {
+            const newDocs = data.facturas;
+
+            // Crear un mapa de documentos anteriores por ID para búsqueda rápida
+            const prevDocsMap = new Map(prevDocs.map(doc => [doc.id, doc]));
+
+            // Mergear documentos: usar estado local si el documento ya no está en PROCESSING
+            return newDocs.map(newDoc => {
+              const prevDoc = prevDocsMap.get(newDoc.id);
+
+              // Si el documento existía previamente y NO está en PROCESSING, preservar su estado local
+              if (prevDoc && prevDoc.status !== DOCUMENT_STATUS.PROCESSING) {
+                return {
+                  ...newDoc,
+                  status: prevDoc.status,
+                  statusInfo: prevDoc.statusInfo,
+                  deeplink: prevDoc.deeplink,
+                  error: prevDoc.error
+                };
+              }
+
+              // Para documentos nuevos o en PROCESSING, usar los datos del backend
+              return newDoc;
+            });
+          });
+        } else {
+          setDocuments(data.facturas);
+        }
+      }
     } catch (error) {
       console.error('Error cargando documentos:', error);
       showMessage('Error al cargar documentos existentes', TIMEOUTS.MESSAGE_DURATION);
@@ -319,7 +350,7 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
         throw new Error('La API no confirmó una subida exitosa');
       }
 
-      await Promise.all([loadDocuments(), checkComprobantesDisponibles()]);
+      await Promise.all([loadDocuments(true), checkComprobantesDisponibles()]);
 
       showMessage('Documento subido exitosamente - Procesando...', TIMEOUTS.MESSAGE_DURATION);
 
