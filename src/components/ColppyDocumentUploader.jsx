@@ -3,9 +3,9 @@ import DocumentViewer from './DocumentViewer';
 import MessageDisplay from './MessageDisplay';
 import UploadArea from './UploadArea';
 import DocumentList from './DocumentList';
-import ProductTour from './ProductTour';
 import useTimeoutManager from '../hooks/useTimeoutManager';
 import useMessage from '../hooks/useMessage';
+import useIntercom from '../hooks/useIntercom';
 import { DOCUMENT_STATUS, STATE_MAPPING, TIMEOUTS } from '../utils/constants';
 import { convertToBase64 } from '../utils/fileUtils';
 
@@ -24,7 +24,6 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
   const [currentDocument, setCurrentDocument] = useState(null);
   const [comprobantesInfo, setComprobantesInfo] = useState(null);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
-  const [runTour, setRunTour] = useState(false);
 
   // Refs
   const intervalRef = useRef(null);
@@ -33,6 +32,18 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
   // Custom hooks
   const timeoutManager = useTimeoutManager();
   const { message: uploadMessage, showMessage } = useMessage();
+
+  // Intercom integration
+  const intercom = useIntercom(import.meta.env.VITE_INTERCOM_APP_ID, {
+    user_id: empresaId,
+    email: email,
+    name: email || `Usuario ${empresaId}`,
+    created_at: Math.floor(Date.now() / 1000),
+    // Datos personalizados
+    empresa_id: empresaId,
+    creditos_disponibles: comprobantesInfo?.comprobantes_restantes || 0,
+    total_documentos: documents.length
+  });
 
   // Memoized values
   const password = useMemo(() => getCookie('loginPasswordCookie') ?? "", [getCookie]);
@@ -351,11 +362,6 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
     setCurrentDocument(null);
   }, []);
 
-  const handleTourComplete = useCallback(() => {
-    localStorage.setItem('hasSeenProductTour', 'true');
-    setRunTour(false);
-  }, []);
-
   // Effects
   useEffect(() => {
     const initialize = async () => {
@@ -367,13 +373,6 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
 
       setInitialLoadComplete(true);
       setLoading(false);
-
-      // Verificar si es la primera vez que visita
-      const hasSeenTour = localStorage.getItem('hasSeenProductTour');
-      if (!hasSeenTour) {
-        // Esperar un poco para que la UI esté renderizada
-        setTimeout(() => setRunTour(true), 500);
-      }
     };
 
     initialize();
@@ -408,7 +407,6 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <ProductTour run={runTour} onComplete={handleTourComplete} />
       <div className="max-w-7xl mx-auto">
         {isLoading ? (
           <div style={{
