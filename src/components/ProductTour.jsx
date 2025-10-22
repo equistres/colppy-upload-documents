@@ -1,7 +1,31 @@
 import { useState, useEffect } from 'react';
-import Joyride, { STATUS } from 'react-joyride';
+import Joyride, { STATUS, ACTIONS, EVENTS } from 'react-joyride';
 
 const ProductTour = ({ run, onComplete }) => {
+  useEffect(() => {
+    // Forzar traducción de botones cuando el tour se monta
+    const interval = setInterval(() => {
+      const nextButton = document.querySelector('[data-action="primary"]');
+      const skipButton = document.querySelector('[data-action="skip"]');
+      const backButton = document.querySelector('[data-action="back"]');
+
+      if (nextButton && nextButton.textContent === 'Next') {
+        nextButton.textContent = 'Siguiente';
+      }
+      if (nextButton && nextButton.textContent === 'Last') {
+        nextButton.textContent = 'Finalizar';
+      }
+      if (skipButton && skipButton.textContent === 'Skip') {
+        skipButton.textContent = 'Saltar tour';
+      }
+      if (backButton && backButton.textContent === 'Back') {
+        backButton.textContent = 'Anterior';
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [run]);
+
   const steps = [
     {
       target: 'body',
