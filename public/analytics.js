@@ -7,6 +7,36 @@ MIXPANEL_CUSTOM_LIB_URL:"file:"===f.location.protocol&&"//cdn.mxpnl.com/libs/mix
 var _0x2a4e=['70cdfac3c6917b21c98de14b024a9d2a','localStorage'];
 mixpanel.init(_0x2a4e[0],{debug:true,track_pageview:true,persistence:_0x2a4e[1]});
 
+// Identificar usuario en Mixpanel e Intercom
+window.identifyUser = function(userId, userProperties) {
+    // Identificar en Mixpanel
+    if (typeof mixpanel !== 'undefined') {
+        try {
+            mixpanel.identify(userId);
+            if (userProperties) {
+                mixpanel.people.set(userProperties);
+            }
+            console.log('✅ Mixpanel - Usuario identificado:', userId, userProperties);
+        } catch (e) {
+            console.error('❌ Mixpanel identify error:', e);
+        }
+    }
+
+    // Identificar en Intercom
+    if (window.Intercom) {
+        try {
+            const intercomData = {
+                user_id: userId,
+                ...userProperties
+            };
+            window.Intercom('update', intercomData);
+            console.log('✅ Intercom - Usuario identificado:', userId, userProperties);
+        } catch (e) {
+            console.error('❌ Intercom identify error:', e);
+        }
+    }
+};
+
 // Tracking helper - Envía a Mixpanel e Intercom
 window.trackEvent = function(eventName, properties) {
     // Enviar a Mixpanel

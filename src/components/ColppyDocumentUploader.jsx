@@ -71,6 +71,22 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
     [authData.cookiesAvailable, comprobantesInfo]
   );
 
+  // Identificar usuario en analytics cuando esté disponible
+  useEffect(() => {
+    if (email && empresaId) {
+      if (typeof window.identifyUser !== 'undefined') {
+        window.identifyUser(email, {
+          email: email,
+          name: email,
+          empresa_id: empresaId,
+          created_at: Math.floor(Date.now() / 1000),
+          creditos_disponibles: comprobantesInfo?.comprobantes_restantes || 0,
+          total_documentos: documents.length
+        });
+      }
+    }
+  }, [email, empresaId, comprobantesInfo, documents.length]);
+
   const isLoading = useMemo(() => {
     // Si empresaId o email aún no están disponibles, seguir cargando
     if (!empresaId || !email) {

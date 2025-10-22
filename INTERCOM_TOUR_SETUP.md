@@ -167,9 +167,70 @@ Estos eventos te permiten:
 
 ---
 
+## Identificación de Usuarios
+
+La aplicación **identifica automáticamente** a los usuarios en Mixpanel e Intercom usando su email cuando la aplicación carga.
+
+### Cómo funciona:
+
+Cuando el usuario inicia la aplicación, se ejecuta automáticamente:
+
+```javascript
+window.identifyUser(email, {
+  email: email,
+  name: email,
+  empresa_id: empresaId,
+  created_at: timestamp,
+  creditos_disponibles: creditos,
+  total_documentos: cantidad
+});
+```
+
+Esto hace que:
+- **Mixpanel**: Asocie los eventos con el email del usuario existente
+- **Intercom**: Encuentre al usuario por email y actualice su información
+
+### Datos enviados en la identificación:
+
+- `user_id` / `email`: Email del usuario (identificador único)
+- `name`: Nombre del usuario (mismo que email)
+- `empresa_id`: ID de la empresa en Colppy
+- `created_at`: Timestamp de cuándo se identificó
+- `creditos_disponibles`: Créditos disponibles del usuario
+- `total_documentos`: Cantidad de documentos procesados
+
+**Importante**: Si el usuario ya existe en Intercom o Mixpanel con ese email, se actualizarán sus datos en lugar de crear uno nuevo.
+
+---
+
 ## Métodos Disponibles
 
-El hook `useIntercom` retorna los siguientes métodos que podés usar en el código:
+### Función global `window.identifyUser(userId, properties)`
+Identifica al usuario en Mixpanel e Intercom. Se llama automáticamente al cargar la app.
+
+```javascript
+window.identifyUser('usuario@ejemplo.com', {
+  email: 'usuario@ejemplo.com',
+  name: 'Juan Pérez',
+  empresa_id: 123,
+  plan: 'premium'
+});
+```
+
+### Función global `window.trackEvent(eventName, properties)`
+Envía eventos a Mixpanel e Intercom. Se usa automáticamente en los componentes.
+
+```javascript
+window.trackEvent('Compra Realizada', {
+  producto: 'Créditos',
+  cantidad: 50,
+  precio: 100
+});
+```
+
+### Hook `useIntercom` (métodos adicionales)
+
+El hook `useIntercom` retorna métodos específicos de Intercom:
 
 ```javascript
 const intercom = useIntercom(appId, userData);
@@ -179,7 +240,7 @@ intercom.show();                          // Mostrar el messenger
 intercom.hide();                          // Ocultar el messenger
 intercom.showNewMessage("Mensaje");       // Mostrar un mensaje específico
 intercom.startTour(tourId);               // Iniciar un tour específico por ID
-intercom.trackEvent(name, metadata);      // Trackear un evento custom
+intercom.trackEvent(name, metadata);      // Trackear un evento custom (usar window.trackEvent es mejor)
 intercom.update(data);                    // Actualizar datos del usuario
 ```
 
