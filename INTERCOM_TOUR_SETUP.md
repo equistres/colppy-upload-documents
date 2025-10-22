@@ -102,17 +102,68 @@ Los siguientes selectores `data-tour` están disponibles en la aplicación para 
 
 ## Tracking de Eventos
 
-La aplicación ya trackea los siguientes eventos automáticamente:
+La aplicación trackea los siguientes eventos automáticamente usando Intercom:
 
 ### Eventos trackeados:
-- `Boolfy - Archivo Seleccionado`: Cuando el usuario selecciona un archivo
-- `Boolfy - Archivo Subido`: Cuando se sube exitosamente un documento
-- `Boolfy - Visualización de Créditos`: Cuando se muestra información de créditos
 
-Estos eventos se pueden usar en Intercom para:
-- Crear segmentos de usuarios
-- Activar mensajes automáticos
-- Generar reportes de uso
+#### 1. `Boolfy - Archivo Seleccionado`
+**Cuándo se dispara**: Cuando el usuario selecciona un archivo PDF para subir
+**Metadata enviada**:
+```javascript
+{
+  'filename': 'nombre-del-archivo.pdf',
+  'file_size_kb': 1234,
+  'file_type': 'application/pdf',
+  'fecha': '2025-10-22T...'
+}
+```
+
+#### 2. `Boolfy - Archivo Subido`
+**Cuándo se dispara**: Cuando el archivo se sube exitosamente al servidor
+**Metadata enviada**:
+```javascript
+{
+  'filename': 'nombre-del-archivo.pdf',
+  'file_size_kb': 1234,
+  'file_type': 'application/pdf',
+  'fecha': '2025-10-22T...'
+}
+```
+
+#### 3. `Boolfy - Visualización de Créditos`
+**Cuándo se dispara**: Cuando se carga el componente y se muestra información de créditos
+**Metadata enviada**:
+```javascript
+{
+  'creditos_disponibles': 10,
+  'creditos_totales': 50,
+  'puede_procesar': true,
+  'fecha': '2025-10-22T...'
+}
+```
+
+#### 4. `Boolfy - Ver Detalle Click`
+**Cuándo se dispara**: Cuando el usuario hace clic en el ícono del ojo para ver detalles de un documento
+**Metadata enviada**:
+```javascript
+{
+  'document_id': 123,
+  'filename': 'nombre-del-archivo.pdf',
+  'external_code': 'ABC123',
+  'status': 'processed',
+  'has_deeplink': true,
+  'has_error': false,
+  'fecha': '2025-10-22T...'
+}
+```
+
+### Usar estos eventos en Intercom:
+
+Estos eventos te permiten:
+- **Crear segmentos de usuarios**: Por ejemplo, usuarios que han subido más de 5 archivos
+- **Activar mensajes automáticos**: Enviar un mensaje cuando un usuario agota sus créditos
+- **Generar reportes de uso**: Ver cuántos documentos se suben por día
+- **Crear workflows**: Por ejemplo, ofrecer un tour si el usuario no ha visto detalles de ningún documento
 
 ---
 
