@@ -16,9 +16,8 @@ window.identifyUser = function(userId, userProperties) {
             if (userProperties) {
                 mixpanel.people.set(userProperties);
             }
-            console.log('✅ Mixpanel - Usuario identificado:', userId, userProperties);
         } catch (e) {
-            console.error('❌ Mixpanel identify error:', e);
+            console.error('Mixpanel identify error:', e);
         }
     }
 
@@ -31,9 +30,8 @@ window.identifyUser = function(userId, userProperties) {
                 ...userProperties
             };
             window.Intercom('update', intercomData);
-            console.log('✅ Intercom - Usuario identificado:', userId, userProperties);
         } catch (e) {
-            console.error('❌ Intercom identify error:', e);
+            console.error('Intercom identify error:', e);
         }
     }
 };
@@ -44,9 +42,8 @@ window.trackEvent = function(eventName, properties) {
     if (typeof mixpanel !== 'undefined') {
         try {
             mixpanel.track(eventName, properties);
-            console.log('✅ Mixpanel - Evento enviado:', eventName, properties);
         } catch (e) {
-            console.error('❌ Mixpanel error:', e);
+            console.error('Mixpanel error:', e);
         }
     }
 
@@ -54,9 +51,8 @@ window.trackEvent = function(eventName, properties) {
     if (window.Intercom) {
         try {
             window.Intercom('trackEvent', eventName, properties);
-            console.log('✅ Intercom - Evento enviado:', eventName, properties);
         } catch (e) {
-            console.error('❌ Intercom error:', e);
+            console.error('Intercom error:', e);
         }
     }
 };

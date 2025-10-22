@@ -31,10 +31,6 @@ export const useIntercom = (appId, userData = {}) => {
     if (window.Intercom) {
       // Si ya existe, usar boot para identificar correctamente
       window.Intercom('boot', window.intercomSettings);
-      console.log('Intercom: Usuario identificado con email:', userData.email);
-    } else {
-      // Si no existe, el script se cargará automáticamente desde index.html
-      console.log('Intercom: Esperando que el script se cargue...');
     }
 
     // Cleanup al desmontar
