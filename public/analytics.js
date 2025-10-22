@@ -25,8 +25,9 @@ window.identifyUser = function(userId, userProperties) {
     // Identificar en Intercom
     if (window.Intercom) {
         try {
+            // Intercom usa 'email' como identificador principal para encontrar usuarios existentes
             const intercomData = {
-                user_id: userId,
+                email: userId, // El userId debe ser el email
                 ...userProperties
             };
             window.Intercom('update', intercomData);

@@ -12,17 +12,26 @@ export const useIntercom = (appId, userData = {}) => {
       return;
     }
 
+    // Solo configurar si hay email (necesario para identificar usuario existente)
+    if (!userData.email) {
+      console.warn('Intercom: No se proporcionó email, no se puede identificar al usuario');
+      return;
+    }
+
     // Configurar settings globales de Intercom
     window.intercomSettings = {
       api_base: "https://api-iam.intercom.io",
       app_id: appId,
+      email: userData.email, // Email es el identificador principal
+      name: userData.name || userData.email,
       ...userData
     };
 
     // Verificar si Intercom ya está cargado
     if (window.Intercom) {
-      // Si ya existe, actualizar
-      window.Intercom('update', window.intercomSettings);
+      // Si ya existe, usar boot para identificar correctamente
+      window.Intercom('boot', window.intercomSettings);
+      console.log('Intercom: Usuario identificado con email:', userData.email);
     } else {
       // Si no existe, el script se cargará automáticamente desde index.html
       console.log('Intercom: Esperando que el script se cargue...');
@@ -34,7 +43,7 @@ export const useIntercom = (appId, userData = {}) => {
         window.Intercom('shutdown');
       }
     };
-  }, [appId, userData]);
+  }, [appId, userData.email]);
 
   // Métodos útiles de Intercom
   const intercomMethods = {

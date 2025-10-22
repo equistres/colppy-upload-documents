@@ -35,8 +35,7 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
 
   // Intercom integration
   const intercom = useIntercom(import.meta.env.VITE_INTERCOM_APP_ID, {
-    user_id: empresaId,
-    email: email,
+    email: email, // Email es el identificador principal en Intercom
     name: email || `Usuario ${empresaId}`,
     created_at: Math.floor(Date.now() / 1000),
     // Datos personalizados
