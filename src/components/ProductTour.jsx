@@ -7,7 +7,7 @@ const ProductTour = ({ run, onComplete }) => {
       target: 'body',
       content: (
         <div>
-          <h2 className="text-xl font-bold mb-2">Bienvenido al Cargador de Facturas</h2>
+          <h2 className="text-xl font-bold mb-2">Bienvenido al Asistente Colppy IA</h2>
           <p>Te vamos a mostrar cómo funciona esta herramienta en unos pocos pasos.</p>
         </div>
       ),
@@ -29,7 +29,7 @@ const ProductTour = ({ run, onComplete }) => {
       content: (
         <div>
           <h3 className="font-bold mb-2">Zona de Carga</h3>
-          <p>Arrastrá tus facturas en PDF aquí o hacé clic para seleccionar archivos. Las facturas se procesarán automáticamente.</p>
+          <p>Seleccioná tus facturas en PDF haciendo clic en "Seleccionar archivo". Las facturas se procesarán automáticamente.</p>
         </div>
       ),
       placement: 'right',
@@ -54,7 +54,7 @@ const ProductTour = ({ run, onComplete }) => {
       content: (
         <div>
           <h3 className="font-bold mb-2">Acciones de Documento</h3>
-          <p>Hacé clic en el ícono del ojo para ver el contenido extraído de la factura, o en el link para ver el documento original.</p>
+          <p>Hacé clic en el ícono del ojo para ver el contenido extraído de la factura.</p>
         </div>
       ),
       placement: 'left',
@@ -74,9 +74,10 @@ const ProductTour = ({ run, onComplete }) => {
     <Joyride
       steps={steps}
       run={run}
-      continuous
-      showProgress
-      showSkipButton
+      continuous={true}
+      showProgress={true}
+      showSkipButton={true}
+      disableScrolling={false}
       callback={handleJoyrideCallback}
       styles={{
         options: {
@@ -102,6 +103,9 @@ const ProductTour = ({ run, onComplete }) => {
         last: 'Finalizar',
         next: 'Siguiente',
         skip: 'Saltar tour',
+      }}
+      floaterProps={{
+        disableAnimation: false,
       }}
     />
   );
