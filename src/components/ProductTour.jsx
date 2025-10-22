@@ -1,30 +1,8 @@
 import { useState, useEffect } from 'react';
-import Joyride, { STATUS, ACTIONS, EVENTS } from 'react-joyride';
+import Joyride, { STATUS, ACTIONS, EVENTS, LIFECYCLE } from 'react-joyride';
 
 const ProductTour = ({ run, onComplete }) => {
-  useEffect(() => {
-    // Forzar traducción de botones cuando el tour se monta
-    const interval = setInterval(() => {
-      const nextButton = document.querySelector('[data-action="primary"]');
-      const skipButton = document.querySelector('[data-action="skip"]');
-      const backButton = document.querySelector('[data-action="back"]');
-
-      if (nextButton && nextButton.textContent === 'Next') {
-        nextButton.textContent = 'Siguiente';
-      }
-      if (nextButton && nextButton.textContent === 'Last') {
-        nextButton.textContent = 'Finalizar';
-      }
-      if (skipButton && skipButton.textContent === 'Skip') {
-        skipButton.textContent = 'Saltar tour';
-      }
-      if (backButton && backButton.textContent === 'Back') {
-        backButton.textContent = 'Anterior';
-      }
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, [run]);
+  const [stepIndex, setStepIndex] = useState(0);
 
   const steps = [
     {
@@ -86,52 +64,73 @@ const ProductTour = ({ run, onComplete }) => {
   ];
 
   const handleJoyrideCallback = (data) => {
-    const { status } = data;
+    const { status, action, index, lifecycle } = data;
     const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
 
     if (finishedStatuses.includes(status)) {
       onComplete();
     }
+
+    if ([EVENTS.STEP_AFTER, EVENTS.TARGET_NOT_FOUND].includes(data.type)) {
+      setStepIndex(index + (action === ACTIONS.PREV ? -1 : 1));
+    }
   };
 
   return (
-    <Joyride
-      steps={steps}
-      run={run}
-      continuous={true}
-      showProgress={true}
-      showSkipButton={true}
-      disableScrolling={false}
-      callback={handleJoyrideCallback}
-      styles={{
-        options: {
-          primaryColor: '#6633cc',
-          zIndex: 10000,
-        },
-        buttonNext: {
-          backgroundColor: '#6633cc',
-          borderRadius: '8px',
-          padding: '8px 16px',
-        },
-        buttonBack: {
-          color: '#6633cc',
-          marginRight: '10px',
-        },
-        buttonSkip: {
-          color: '#6b7280',
-        },
-      }}
-      locale={{
-        back: 'Anterior',
-        close: 'Cerrar',
-        last: 'Finalizar',
-        next: 'Siguiente',
-        skip: 'Saltar tour',
-      }}
-      floaterProps={{
-        disableAnimation: false,
-      }}
-    />
+    <>
+      <style>{`
+        [data-action="primary"] {
+          background-color: #6633cc !important;
+          border-radius: 8px !important;
+          padding: 8px 16px !important;
+          font-size: 0 !important;
+        }
+        [data-action="primary"]::after {
+          content: '${stepIndex === steps.length - 1 ? 'Finalizar' : 'Siguiente'}';
+          font-size: 14px !important;
+        }
+        [data-action="back"] {
+          color: #6633cc !important;
+          margin-right: 10px !important;
+          font-size: 0 !important;
+        }
+        [data-action="back"]::after {
+          content: 'Anterior';
+          font-size: 14px !important;
+        }
+        [data-action="skip"] {
+          color: #6b7280 !important;
+          font-size: 0 !important;
+        }
+        [data-action="skip"]::after {
+          content: 'Saltar tour';
+          font-size: 14px !important;
+        }
+      `}</style>
+      <Joyride
+        steps={steps}
+        run={run}
+        stepIndex={stepIndex}
+        continuous={true}
+        showProgress={true}
+        showSkipButton={true}
+        disableScrolling={false}
+        callback={handleJoyrideCallback}
+        styles={{
+          options: {
+            primaryColor: '#6633cc',
+            zIndex: 10000,
+          },
+        }}
+        locale={{
+          back: 'Anterior',
+          close: 'Cerrar',
+          last: 'Finalizar',
+          next: 'Siguiente',
+          skip: 'Saltar tour',
+        }}
+      />
+    </>
   );
 };
 
