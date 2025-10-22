@@ -3,6 +3,7 @@ import DocumentViewer from './DocumentViewer';
 import MessageDisplay from './MessageDisplay';
 import UploadArea from './UploadArea';
 import DocumentList from './DocumentList';
+import ProductTour from './ProductTour';
 import useTimeoutManager from '../hooks/useTimeoutManager';
 import useMessage from '../hooks/useMessage';
 import { DOCUMENT_STATUS, STATE_MAPPING, TIMEOUTS } from '../utils/constants';
@@ -23,6 +24,7 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
   const [currentDocument, setCurrentDocument] = useState(null);
   const [comprobantesInfo, setComprobantesInfo] = useState(null);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  const [runTour, setRunTour] = useState(false);
 
   // Refs
   const intervalRef = useRef(null);
@@ -288,7 +290,7 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
         bag: JSON.stringify(authData.formData)
       };
 
-      showMessage('Enviando documento a la API...');
+      showMessage('Enviando documento...');
 
       const response = await fetch(`${API_BASE_URL}/api/documents/upload`, {
         method: 'POST',
@@ -349,6 +351,11 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
     setCurrentDocument(null);
   }, []);
 
+  const handleTourComplete = useCallback(() => {
+    localStorage.setItem('hasSeenProductTour', 'true');
+    setRunTour(false);
+  }, []);
+
   // Effects
   useEffect(() => {
     const initialize = async () => {
@@ -360,6 +367,13 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
 
       setInitialLoadComplete(true);
       setLoading(false);
+
+      // Verificar si es la primera vez que visita
+      const hasSeenTour = localStorage.getItem('hasSeenProductTour');
+      if (!hasSeenTour) {
+        // Esperar un poco para que la UI esté renderizada
+        setTimeout(() => setRunTour(true), 500);
+      }
     };
 
     initialize();
@@ -394,6 +408,7 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
+      <ProductTour run={runTour} onComplete={handleTourComplete} />
       <div className="max-w-7xl mx-auto">
         {isLoading ? (
           <div style={{

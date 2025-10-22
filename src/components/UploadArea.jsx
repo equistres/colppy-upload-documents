@@ -208,7 +208,7 @@ const UploadArea = ({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+    <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100" data-tour="upload-area">
       <h2 className="text-xl font-semibold text-gray-800 mb-2 flex items-center">
         <Upload className="w-6 h-6 mr-2 text-colppy" />
         Subir Documento
@@ -244,11 +244,13 @@ const UploadArea = ({
             </div>
           )}
           {authData.cookiesAvailable && comprobantesInfo && (
-            <div className={`text-xs mt-2 p-2 rounded border ${
-              comprobantesInfo.canProcessFacturas
-                ? 'bg-purple-50 border-purple-200 text-purple-700'
-                : 'bg-orange-50 border-orange-200 text-orange-700'
-            }`}>
+            <div
+              data-tour="credits"
+              className={`text-xs mt-2 p-2 rounded border ${
+                comprobantesInfo.canProcessFacturas
+                  ? 'bg-purple-50 border-purple-200 text-purple-700'
+                  : 'bg-orange-50 border-orange-200 text-orange-700'
+              }`}>
               <div className="flex items-center justify-between">
                 <span className="font-medium">
                   Creditos disponibles: {comprobantesInfo.comprobantes_restantes || 0}

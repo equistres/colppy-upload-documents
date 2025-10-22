@@ -45,7 +45,7 @@ const formatDate = (dateString) => {
   };
 };
 
-const DocumentItem = ({ document, onOpenDocument }) => {
+const DocumentItem = ({ document, onOpenDocument, ...props }) => {
   const { date, time } = formatDate(document.uploadDate);
 
   const handleViewDocument = () => {
@@ -65,7 +65,7 @@ const DocumentItem = ({ document, onOpenDocument }) => {
   };
 
   return (
-    <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-gray-50">
+    <div {...props} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-gray-50">
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
           <h3 className="font-medium text-gray-800 truncate">{document.filename}</h3>

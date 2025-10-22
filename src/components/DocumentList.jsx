@@ -4,11 +4,12 @@ import DocumentItem from './DocumentItem';
 const DocumentList = ({ documents, onOpenDocument }) => {
   const renderContent = () => {
     if (documents.length > 0) {
-      return documents.map(doc => (
+      return documents.map((doc, index) => (
         <DocumentItem
           key={doc.id}
           document={doc}
           onOpenDocument={onOpenDocument}
+          data-tour={index === 0 ? "document-item" : undefined}
         />
       ));
     }
@@ -23,7 +24,7 @@ const DocumentList = ({ documents, onOpenDocument }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+    <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100" data-tour="document-list">
       <h2 className="text-xl font-semibold text-gray-800 mb-6 flex items-center justify-between">
         <span className="flex items-center">
           <FileText className="w-6 h-6 mr-2 text-colppy" />
