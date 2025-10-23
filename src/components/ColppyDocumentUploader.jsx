@@ -15,6 +15,7 @@ import { convertToBase64 } from '../utils/fileUtils';
 const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const ADDONS_URL = import.meta.env.VITE_ADDONS_URL;
+  const API_COLPPY_URL = import.meta.env.VITE_API_COLPPY_URL;
 
   // State
   const [documents, setDocuments] = useState([]);
@@ -58,10 +59,10 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
         user: username,
         claveSesion: password,
         idEmpresa: empresaId,
-        endPoint: 'https://staging.colppy.com/lib/frontera2/service.php'
+        endPoint: API_COLPPY_URL
       } : null
     };
-  }, [email, password, empresaId]);
+  }, [email, password, empresaId, API_COLPPY_URL]);
 
   const canUpload = useMemo(() =>
     authData.cookiesAvailable &&
