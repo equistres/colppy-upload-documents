@@ -1,6 +1,3 @@
-import React from 'react';
-import { X } from 'lucide-react';
-
 const DocumentViewer = ({ document, isOpen, onClose }) => {
   if (!isOpen || !document?.deeplink) return null;
 
@@ -13,15 +10,6 @@ const DocumentViewer = ({ document, isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 z-50 bg-black bg-opacity-50" onClick={handleBackdropClick}>
       <div className="relative w-full h-full p-4">
-        {/* Botón cerrar */}
-        <button
-          onClick={onClose}
-          className="absolute top-6 right-6 z-10 p-2 bg-white rounded-full shadow-lg hover:bg-gray-100 transition-colors"
-          title="Cerrar"
-        >
-          <X className="w-5 h-5 text-gray-600" />
-        </button>
-
         {/* Iframe contenedor */}
         <div className="w-full h-full bg-white rounded-lg shadow-xl overflow-hidden">
           <iframe
@@ -31,6 +19,17 @@ const DocumentViewer = ({ document, isOpen, onClose }) => {
             title={document.filename || 'Documento'}
           />
         </div>
+
+        {/* Botón cerrar en esquina inferior derecha */}
+        <button
+          onClick={onClose}
+          className="absolute bottom-8 right-8 z-10 px-6 py-3 text-white font-semibold rounded-lg shadow-lg hover:opacity-90 transition-opacity"
+          style={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+          }}
+        >
+          Cerrar
+        </button>
       </div>
     </div>
   );
