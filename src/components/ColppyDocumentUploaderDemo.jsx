@@ -50,17 +50,9 @@ const ColppyDocumentUploaderDemo = ({ addonsUrl }) => {
   }, [showMessage]);
 
   const handleInterestClick = useCallback(() => {
-    // Track event en Intercom
-    if (window.Intercom) {
-      window.Intercom('trackEvent', 'boolfy-demo-interest', {
-        timestamp: new Date().toISOString(),
-        source: 'demo-banner'
-      });
-    }
-
-    // Track event en Mixpanel
+    // Track event - Se envía automáticamente a Mixpanel e Intercom
     if (typeof window.trackEvent !== 'undefined') {
-      window.trackEvent('Boolfy - Interés en Funcionalidad Demo', {
+      window.trackEvent('Boolfy - Interés en Demo', {
         'timestamp': new Date().toISOString(),
         'source': 'demo-banner'
       });
