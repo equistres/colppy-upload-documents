@@ -33,8 +33,35 @@ export const useIntercom = (appId, userData = {}) => {
       window.Intercom('boot', window.intercomSettings);
     }
 
+    // Ocultar el launcher de Intercom
+    const hideIntercomLauncher = () => {
+      const selectors = [
+        '.intercom-lightweight-app-launcher',
+        '.intercom-launcher',
+        '.intercom-launcher-frame'
+      ];
+
+      selectors.forEach(selector => {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach(el => {
+          el.style.setProperty('display', 'none', 'important');
+        });
+      });
+    };
+
+    // Ejecutar inmediatamente
+    hideIntercomLauncher();
+
+    // Observar cambios en el DOM para ocultar cuando se agregue
+    const observer = new MutationObserver(hideIntercomLauncher);
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+
     // Cleanup al desmontar
     return () => {
+      observer.disconnect();
       if (window.Intercom) {
         window.Intercom('shutdown');
       }
