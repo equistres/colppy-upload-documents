@@ -258,7 +258,7 @@ const UploadArea = ({
               </div>
               {comprobantesInfo.comprobantes_comprados && (
                 <div className="text-xs text-gray-500 mt-1">
-                  Total del plan: {comprobantesInfo.comprobantes_comprados}
+                  Total adquiridos: {comprobantesInfo.comprobantes_comprados}
                 </div>
               )}
             </div>

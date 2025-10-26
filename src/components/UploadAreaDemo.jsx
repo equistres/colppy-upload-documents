@@ -47,7 +47,7 @@ const UploadAreaDemo = ({ addonsUrl, showMessage }) => {
             </span>
           </div>
           <div className="text-xs text-gray-500 mt-1">
-            Total del plan: 200
+            Total adquiridos: 200
           </div>
         </div>
       </div>
