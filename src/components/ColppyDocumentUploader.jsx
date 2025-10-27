@@ -36,7 +36,6 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
 
   // Intercom integration
   const intercom = useIntercom(import.meta.env.VITE_INTERCOM_APP_ID, {
-    user_id: String(empresaId),
     email: email,
     name: email || `Usuario ${empresaId}`,
     created_at: Math.floor(Date.now() / 1000),
@@ -71,19 +70,18 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
     [authData.cookiesAvailable, comprobantesInfo]
   );
 
-  // Identificar usuario en analytics cuando esté disponible
+  // Actualizar propiedades del usuario en Mixpanel (sin re-identificar)
   useEffect(() => {
-    if (email && empresaId) {
-      if (typeof window.identifyUser !== 'undefined') {
-        window.identifyUser(String(empresaId), {
-          email: email,
-          name: email,
-          empresa_id: String(empresaId),
-          created_at: Math.floor(Date.now() / 1000),
-          creditos_disponibles: comprobantesInfo?.comprobantes_restantes || 0,
-          total_documentos: documents.length
-        });
-      }
+    if (email && empresaId && window.mixpanel) {
+      window.mixpanel.people.set({
+        $email: email,
+        email: email,
+        name: email,
+        empresa_id: String(empresaId),
+        created_at: Math.floor(Date.now() / 1000),
+        creditos_disponibles: comprobantesInfo?.comprobantes_restantes || 0,
+        total_documentos: documents.length
+      });
     }
   }, [email, empresaId, comprobantesInfo, documents.length]);
 

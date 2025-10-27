@@ -1,32 +1,39 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
-const useFeatureFlag = (flagName, userId) => {
+const useFeatureFlag = (flagName, userId, customProperties = {}) => {
   const [isEnabled, setIsEnabled] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Memoizar customProperties para evitar re-renders innecesarios
+  const memoizedProps = useMemo(() => customProperties, [JSON.stringify(customProperties)]);
+
   useEffect(() => {
     if (!userId) {
-      // Mantener isLoading = true hasta que llegue el userId
       return;
     }
 
     let mounted = true;
     let attempts = 0;
-    const maxAttempts = 40; // 10 segundos (40 * 250ms)
+    const maxAttempts = 40;
 
     const checkFlag = () => {
       attempts++;
 
-      // Identificar usuario en Mixpanel
       if (window.mixpanel && attempts === 1) {
-        window.mixpanel.identify(String(userId));
+        window.mixpanel.identify(userId);
         window.mixpanel.people.set({
-          empresa_id: String(userId)
+          $email: userId,
+          email: userId,
+          ...memoizedProps
         });
       }
 
-      // Verificar si Mixpanel.flags está disponible
       if (window.mixpanel?.flags?.is_enabled) {
+        if (attempts < 3) {
+          setTimeout(checkFlag, 250);
+          return;
+        }
+
         window.mixpanel.flags.is_enabled(flagName, false)
           .then(enabled => {
             if (mounted) {
@@ -55,7 +62,7 @@ const useFeatureFlag = (flagName, userId) => {
     return () => {
       mounted = false;
     };
-  }, [flagName, userId]);
+  }, [flagName, userId, memoizedProps]);
 
   return [isEnabled, isLoading];
 };

@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import ColppyDocumentUploader from './ColppyDocumentUploader';
 import ColppyDocumentUploaderDemo from './ColppyDocumentUploaderDemo';
 import useFeatureFlag from '../hooks/useFeatureFlag';
@@ -5,8 +6,13 @@ import useFeatureFlag from '../hooks/useFeatureFlag';
 const ColppyDocumentUploaderWrapper = ({ empresaId, email, getCookie }) => {
   const ADDONS_URL = import.meta.env.VITE_ADDONS_URL;
 
-  // Feature flag check usando empresaId
-  const [isFeatureEnabled, isLoadingFlag] = useFeatureFlag('colppy-boolfy', empresaId);
+  // Memoizar customProperties para evitar re-renders
+  const customProperties = useMemo(() => ({
+    empresa_id: String(empresaId)
+  }), [empresaId]);
+
+  // Feature flag check usando email y empresa_id como propiedad personalizada
+  const [isFeatureEnabled, isLoadingFlag] = useFeatureFlag('colppy-boolfy', email, customProperties);
 
   // Mientras carga el feature flag, mostrar loader
   if (isLoadingFlag) {
