@@ -3,7 +3,6 @@ import DocumentViewer from './DocumentViewer';
 import MessageDisplay from './MessageDisplay';
 import UploadArea from './UploadArea';
 import DocumentList from './DocumentList';
-import ColppyDocumentUploaderDemo from './ColppyDocumentUploaderDemo';
 import useTimeoutManager from '../hooks/useTimeoutManager';
 import useMessage from '../hooks/useMessage';
 import useIntercom from '../hooks/useIntercom';
@@ -17,14 +16,6 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const ADDONS_URL = import.meta.env.VITE_ADDONS_URL;
   const API_COLPPY_URL = import.meta.env.VITE_API_COLPPY_URL;
-  const ENABLED_COMPANIES = import.meta.env.VITE_ENABLED_COMPANIES;
-
-  // Validación de empresa habilitada - PRIMERA VALIDACIÓN
-  const isEmpresaEnabled = useMemo(() => {
-    if (!ENABLED_COMPANIES || !empresaId) return null; // null = aún no sabemos
-    const enabledIds = ENABLED_COMPANIES.split(',').map(id => id.trim());
-    return enabledIds.includes(String(empresaId));
-  }, [ENABLED_COMPANIES, empresaId]);
 
   // State
   const [documents, setDocuments] = useState([]);
@@ -429,50 +420,6 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
     };
   }, [timeoutManager]);
 
-
-  // Mientras no sepamos si la empresa está habilitada, mostrar loading
-  if (isEmpresaEnabled === null) {
-    return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-7xl mx-auto">
-          <div style={{
-            minHeight: '60vh',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
-          }}>
-            <div style={{
-              background: 'white',
-              padding: '3rem',
-              borderRadius: '12px',
-              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-              textAlign: 'center'
-            }}>
-              <div style={{
-                width: '32px',
-                height: '32px',
-                border: '3px solid #e5e7eb',
-                borderTop: '3px solid #6633cc',
-                borderRadius: '50%',
-                animation: 'spin 1s linear infinite',
-                margin: '0 auto 1rem'
-              }}></div>
-              <p style={{ color: '#6b7280', margin: 0, fontSize: '16px' }}>Cargando...</p>
-            </div>
-            <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Si la empresa NO está habilitada, mostrar componente demo separado
-  if (isEmpresaEnabled === false) {
-    return <ColppyDocumentUploaderDemo addonsUrl={ADDONS_URL} />;
-  }
-
-  // Si la empresa SÍ está habilitada, mostrar funcionalidad real
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
