@@ -170,8 +170,7 @@ const UploadArea = ({
           </div>
         ) : (
           <div className="mb-6">
-            <h3 className="text-xl font-medium text-gray-700 mb-3">Arrastra tu archivo PDF aquí</h3>
-            <p className="text-base text-gray-500">o usa el botón para seleccionar</p>
+            <p className="text-base text-gray-600">Arrastrá el archivo o hacé click en el botón para seleccionarlo desde tu computadora.</p>
           </div>
         )}
 
@@ -253,7 +252,7 @@ const UploadArea = ({
               }`}>
               <div className="flex items-center justify-between">
                 <span className="font-medium">
-                  Creditos disponibles: {comprobantesInfo.comprobantes_restantes || 0}
+                  Créditos disponibles: {comprobantesInfo.comprobantes_restantes || 0}
                 </span>
               </div>
               {comprobantesInfo.comprobantes_comprados && (

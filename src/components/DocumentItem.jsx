@@ -20,7 +20,7 @@ const getStatusIcon = (status) => {
 const getStatusText = (status) => {
   const texts = {
     [DOCUMENT_STATUS.PROCESSED]: 'Procesado',
-    [DOCUMENT_STATUS.PROCESSING]: 'Procesando',
+    [DOCUMENT_STATUS.PROCESSING]: 'En proceso',
     [DOCUMENT_STATUS.ERROR]: 'Error',
     default: 'Desconocido'
   };
@@ -88,7 +88,7 @@ const DocumentItem = ({ document, onOpenDocument, ...props }) => {
               className="ml-2 p-1 text-colppy hover:text-colppy-hover hover:bg-purple-50 rounded transition-colors"
               title="Ver documento procesado"
             >
-              <Eye className="w-4 h-4" />
+              <Eye className="w-5 h-5" />
             </button>
           )}
         </div>

@@ -21,8 +21,7 @@ const UploadAreaDemo = ({ addonsUrl, showMessage }) => {
           <FileText className="w-20 h-20 mb-6 text-gray-400" />
 
           <div className="mb-6">
-            <h3 className="text-xl font-medium text-gray-700 mb-3">Arrastra tu archivo PDF aquí</h3>
-            <p className="text-base text-gray-500">o usa el botón para seleccionar</p>
+            <p className="text-base text-gray-600">Arrastrá el archivo o hacé click en el botón para seleccionarlo desde tu computadora.</p>
           </div>
 
           <div className="flex gap-4">
@@ -43,7 +42,7 @@ const UploadAreaDemo = ({ addonsUrl, showMessage }) => {
         >
           <div className="flex items-center justify-between">
             <span className="font-medium">
-              Creditos disponibles: 150
+              Créditos disponibles: 150
             </span>
           </div>
           <div className="text-xs text-gray-500 mt-1">

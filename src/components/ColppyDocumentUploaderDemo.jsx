@@ -72,19 +72,18 @@ const ColppyDocumentUploaderDemo = ({ addonsUrl }) => {
         {/* Banner informativo sobre feature experimental */}
         <div style={{
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          padding: '1.5rem',
-          borderRadius: '12px',
-          marginBottom: '2rem',
+          padding: '1rem 1.25rem',
+          borderRadius: '10px',
+          marginBottom: '1.5rem',
           color: 'white',
           textAlign: 'center',
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
         }}>
-          <div style={{ fontSize: '24px', marginBottom: '0.5rem' }}>🤖 ✨</div>
-          <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '20px', fontWeight: '600' }}>
-            Feature Experimental con IA
+          <h3 style={{ margin: '0 0 0.375rem 0', fontSize: '16px', fontWeight: '600' }}>
+            Nueva funcionalidad con Inteligencia Artificial
           </h3>
-          <p style={{ margin: '0 0 1rem 0', fontSize: '14px', opacity: 0.9 }}>
-            Esta es una demostración de nuestra nueva funcionalidad de procesamiento de facturas con Inteligencia Artificial
+          <p style={{ margin: '0 0 0.75rem 0', fontSize: '13px', opacity: 0.9 }}>
+            Esto es una demostración de una funcionalidad en desarrollo que usa inteligencia artificial para procesar facturas automáticamente.
           </p>
           <button
             onClick={handleInterestClick}
@@ -92,9 +91,9 @@ const ColppyDocumentUploaderDemo = ({ addonsUrl }) => {
               background: 'rgba(255, 255, 255, 0.2)',
               border: '2px solid white',
               color: 'white',
-              padding: '0.75rem 1.5rem',
-              borderRadius: '8px',
-              fontSize: '14px',
+              padding: '0.5rem 1rem',
+              borderRadius: '6px',
+              fontSize: '13px',
               fontWeight: '600',
               cursor: 'pointer',
               transition: 'all 0.2s',
@@ -109,7 +108,7 @@ const ColppyDocumentUploaderDemo = ({ addonsUrl }) => {
               e.currentTarget.style.transform = 'translateY(0)';
             }}
           >
-            ¿Te interesa esta funcionalidad?
+            Quiero probarla
           </button>
         </div>
 
