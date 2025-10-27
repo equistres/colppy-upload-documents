@@ -14,6 +14,6 @@ body {
 /* Ocultar el launcher de Intercom */
 .intercom-lightweight-app-launcher,
 .intercom-launcher,
-.intercom-launcher-frame {
+.intercom-launcher-frame, .intercom-app {
   display: none !important;
 }
