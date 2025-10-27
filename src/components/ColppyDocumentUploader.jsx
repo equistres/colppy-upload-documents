@@ -36,11 +36,11 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
 
   // Intercom integration
   const intercom = useIntercom(import.meta.env.VITE_INTERCOM_APP_ID, {
-    email: email, // Email es el identificador principal en Intercom
+    user_id: String(empresaId),
+    email: email,
     name: email || `Usuario ${empresaId}`,
     created_at: Math.floor(Date.now() / 1000),
-    // Datos personalizados
-    empresa_id: empresaId,
+    empresa_id: String(empresaId),
     creditos_disponibles: comprobantesInfo?.comprobantes_restantes || 0,
     total_documentos: documents.length
   });
@@ -75,10 +75,10 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
   useEffect(() => {
     if (email && empresaId) {
       if (typeof window.identifyUser !== 'undefined') {
-        window.identifyUser(email, {
+        window.identifyUser(String(empresaId), {
           email: email,
           name: email,
-          empresa_id: empresaId,
+          empresa_id: String(empresaId),
           created_at: Math.floor(Date.now() / 1000),
           creditos_disponibles: comprobantesInfo?.comprobantes_restantes || 0,
           total_documentos: documents.length
