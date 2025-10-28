@@ -24,29 +24,27 @@ const UploadAreaDemo = ({ addonsUrl, showMessage }) => {
       {/* Área de contenido */}
       <div className="p-6">
         <div
-          className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center bg-gray-50 cursor-not-allowed relative"
+          className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50 cursor-not-allowed relative"
           onClick={handleClick}
         >
-          {/* Overlay de bloqueo */}
-          <div className="absolute inset-0 bg-gray-100 bg-opacity-60 rounded-lg flex items-center justify-center">
-            <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-200">
-              <Lock className="w-4 h-4 text-gray-600" strokeWidth={2} />
-              <span className="text-sm font-medium text-gray-700">Modo Demo</span>
-            </div>
+          {/* Badge de demo en la esquina */}
+          <div className="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg shadow-sm border border-gray-200">
+            <Lock className="w-3.5 h-3.5 text-gray-600" strokeWidth={2} />
+            <span className="text-xs font-medium text-gray-700">Demo</span>
           </div>
 
-          <div className="flex flex-col items-center opacity-50 pointer-events-none">
-            <div className="p-5 bg-gray-100 rounded-full mb-4">
-              <FileText className="w-14 h-14 text-gray-400" strokeWidth={1.5} />
+          <div className="flex flex-col items-center opacity-60 pointer-events-none">
+            <div className="p-4 bg-gray-100 rounded-full mb-3">
+              <FileText className="w-12 h-12 text-gray-400" strokeWidth={1.5} />
             </div>
 
-            <div className="mb-6">
-              <h3 className="text-base font-semibold text-gray-900 mb-1">Seleccionar Documento</h3>
-              <p className="text-sm text-gray-600">Arrastra un archivo PDF o haz clic para seleccionar</p>
+            <div className="mb-4">
+              <h3 className="text-sm font-semibold text-gray-900 mb-1">Seleccionar Documento</h3>
+              <p className="text-xs text-gray-600">Arrastra un archivo PDF o haz clic para seleccionar</p>
             </div>
 
             <button
-              className="px-6 py-3 rounded-lg bg-gray-400 text-white font-medium"
+              className="px-5 py-2 rounded-lg bg-gray-400 text-white text-sm font-medium"
               disabled
             >
               Seleccionar Archivo

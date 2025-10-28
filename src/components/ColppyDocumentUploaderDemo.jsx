@@ -82,7 +82,7 @@ const ColppyDocumentUploaderDemo = ({ addonsUrl }) => {
               onClick={handleInterestClick}
               className="px-5 py-2.5 bg-white text-colppy text-sm font-medium rounded-lg hover:bg-gray-50 transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white"
             >
-              Quiero probarla
+              Quiero enterarme cuando esté lista
             </button>
           </div>
         </div>
