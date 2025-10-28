@@ -20,7 +20,7 @@ const getStatusIcon = (status) => {
 const getStatusText = (status) => {
   const texts = {
     [DOCUMENT_STATUS.PROCESSED]: 'Procesado',
-    [DOCUMENT_STATUS.PROCESSING]: 'Procesando',
+    [DOCUMENT_STATUS.PROCESSING]: 'En Proceso',
     [DOCUMENT_STATUS.ERROR]: 'Error',
     default: 'Desconocido'
   };
