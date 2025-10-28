@@ -20,10 +20,10 @@ const DocumentViewer = ({ document, isOpen, onClose }) => {
           />
         </div>
 
-        {/* Botón cerrar en esquina inferior derecha, más compacto */}
+        {/* Botón cerrar en esquina inferior derecha */}
         <button
           onClick={onClose}
-          className="absolute bottom-6 right-6 z-10 px-4 py-2 text-white text-sm font-semibold rounded shadow-lg hover:opacity-90 transition-opacity"
+          className="absolute bottom-8 right-8 z-10 px-4 py-2 text-white text-sm font-semibold rounded shadow-lg hover:opacity-90 transition-opacity"
           style={{
             background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
           }}
