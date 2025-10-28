@@ -1,4 +1,4 @@
-import { Upload, FileText } from 'lucide-react';
+import { Upload, FileText, Lock } from 'lucide-react';
 
 // Componente de UploadArea para modo DEMO - Solo visual, sin funcionalidad
 const UploadAreaDemo = ({ addonsUrl, showMessage }) => {
@@ -7,46 +7,68 @@ const UploadAreaDemo = ({ addonsUrl, showMessage }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100" data-tour="upload-area">
-      <h2 className="text-xl font-semibold text-gray-800 mb-2 flex items-center">
-        <Upload className="w-6 h-6 mr-2 text-colppy" />
-        Subir Documento
-      </h2>
-
-      <div
-        className="border-2 border-dashed rounded-lg p-12 text-center border-gray-300 bg-gray-50 opacity-70 cursor-not-allowed"
-        onClick={handleClick}
-      >
-        <div className="flex flex-col items-center pointer-events-none">
-          <FileText className="w-20 h-20 mb-6 text-gray-400" />
-
-          <div className="mb-6">
-            <p className="text-base text-gray-600">Arrastrá el archivo o hacé click en el botón para seleccionarlo desde tu computadora.</p>
+    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden" data-tour="upload-area">
+      {/* Header profesional */}
+      <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-b from-gray-50 to-white">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-colppy to-purple-700 rounded-lg shadow-sm">
+            <Upload className="w-5 h-5 text-white" strokeWidth={2} />
           </div>
-
-          <div className="flex gap-4">
-            <button
-              className="px-6 py-3 rounded-lg bg-gray-400 text-white cursor-not-allowed opacity-60 font-medium"
-              disabled
-            >
-              Seleccionar archivo
-            </button>
+          <div>
+            <h2 className="text-base font-semibold text-gray-900">Cargar Documento</h2>
+            <p className="text-xs text-gray-500">Sube archivos PDF para procesar con IA</p>
           </div>
         </div>
       </div>
 
-      <div className="mt-2 bg-gray-50 rounded-lg p-4">
+      {/* Área de contenido */}
+      <div className="p-6">
         <div
-          data-tour="credits"
-          className="text-xs mt-2 p-2 rounded border bg-purple-50 border-purple-200 text-purple-700"
+          className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center bg-gray-50 cursor-not-allowed relative"
+          onClick={handleClick}
         >
-          <div className="flex items-center justify-between">
-            <span className="font-medium">
-              Créditos disponibles: 150
-            </span>
+          {/* Overlay de bloqueo */}
+          <div className="absolute inset-0 bg-gray-100 bg-opacity-60 rounded-lg flex items-center justify-center">
+            <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-200">
+              <Lock className="w-4 h-4 text-gray-600" strokeWidth={2} />
+              <span className="text-sm font-medium text-gray-700">Modo Demo</span>
+            </div>
           </div>
-          <div className="text-xs text-gray-500 mt-1">
-            Total adquiridos: 200
+
+          <div className="flex flex-col items-center opacity-50 pointer-events-none">
+            <div className="p-5 bg-gray-100 rounded-full mb-4">
+              <FileText className="w-14 h-14 text-gray-400" strokeWidth={1.5} />
+            </div>
+
+            <div className="mb-6">
+              <h3 className="text-base font-semibold text-gray-900 mb-1">Seleccionar Documento</h3>
+              <p className="text-sm text-gray-600">Arrastra un archivo PDF o haz clic para seleccionar</p>
+            </div>
+
+            <button
+              className="px-6 py-3 rounded-lg bg-gray-400 text-white font-medium"
+              disabled
+            >
+              Seleccionar Archivo
+            </button>
+          </div>
+        </div>
+
+        {/* Información de créditos demo */}
+        <div className="mt-6 bg-purple-50 border border-purple-200 rounded-lg p-4" data-tour="credits">
+          <div className="flex items-start gap-3">
+            <div className="flex-1">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-semibold text-purple-900">
+                  Créditos Disponibles
+                </span>
+                <span className="text-lg font-bold text-colppy">150</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-purple-700">Total adquiridos</span>
+                <span className="text-xs font-medium text-purple-700">200</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

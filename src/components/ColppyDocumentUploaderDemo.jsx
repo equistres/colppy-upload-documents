@@ -67,54 +67,29 @@ const ColppyDocumentUploaderDemo = ({ addonsUrl }) => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Banner informativo sobre feature experimental */}
-        <div style={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          padding: '1rem 1.25rem',
-          borderRadius: '10px',
-          marginBottom: '1.5rem',
-          color: 'white',
-          textAlign: 'center',
-          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-        }}>
-          <h3 style={{ margin: '0 0 0.375rem 0', fontSize: '16px', fontWeight: '600' }}>
-            Nueva funcionalidad con Inteligencia Artificial
-          </h3>
-          <p style={{ margin: '0 0 0.75rem 0', fontSize: '13px', opacity: 0.9 }}>
-            Esto es una demostración de una funcionalidad en desarrollo que usa inteligencia artificial para procesar facturas automáticamente.
-          </p>
-          <button
-            onClick={handleInterestClick}
-            style={{
-              background: 'rgba(255, 255, 255, 0.2)',
-              border: '2px solid white',
-              color: 'white',
-              padding: '0.5rem 1rem',
-              borderRadius: '6px',
-              fontSize: '13px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              backdropFilter: 'blur(10px)'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)';
-              e.currentTarget.style.transform = 'translateY(-2px)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
-              e.currentTarget.style.transform = 'translateY(0)';
-            }}
-          >
-            Quiero probarla
-          </button>
+        {/* Banner informativo profesional */}
+        <div className="bg-white rounded-xl border border-purple-200 shadow-sm overflow-hidden mb-6">
+          <div className="bg-gradient-to-br from-colppy to-purple-700 px-6 py-5">
+            <h3 className="text-white text-base font-semibold mb-2">
+              Nueva Funcionalidad con Inteligencia Artificial
+            </h3>
+            <p className="text-purple-100 text-sm leading-relaxed mb-4">
+              Esto es una demostración de una funcionalidad en desarrollo que usa inteligencia artificial para procesar facturas automáticamente.
+            </p>
+            <button
+              onClick={handleInterestClick}
+              className="px-5 py-2.5 bg-white text-colppy text-sm font-medium rounded-lg hover:bg-gray-50 transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white"
+            >
+              Quiero probarla
+            </button>
+          </div>
         </div>
 
         <MessageDisplay message={uploadMessage} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <UploadAreaDemo
             addonsUrl={addonsUrl}
             showMessage={showMessage}

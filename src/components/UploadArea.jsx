@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Upload, FileText, XCircle } from 'lucide-react';
+import { Upload, FileText, XCircle, CheckCircle, Shield } from 'lucide-react';
 
 const FILE_CONSTRAINTS = {
-  MAX_SIZE: 10 * 1024 * 1024, // 10MB
+  MAX_SIZE: 10 * 1024 * 1024,
   ACCEPTED_TYPE: 'application/pdf'
 };
 
@@ -48,7 +48,6 @@ const UploadArea = ({
     setSelectedFile(file);
     showMessage(`Archivo seleccionado: ${file.name}`);
 
-    // Track file selection event
     if (typeof window.trackEvent !== 'undefined') {
       window.trackEvent('Boolfy - Archivo Seleccionado', {
         'filename': file.name,
@@ -75,7 +74,6 @@ const UploadArea = ({
 
     const success = await onUpload(selectedFile);
     if (success) {
-      // Track successful upload
       if (typeof window.trackEvent !== 'undefined') {
         window.trackEvent('Boolfy - Archivo Subido', {
           'filename': selectedFile.name,
@@ -101,14 +99,11 @@ const UploadArea = ({
   const handleDrop = useCallback((e) => {
     e.preventDefault();
     setDragActive(false);
-
     if (!canUpload) return;
-
     const files = e.dataTransfer.files;
     if (files?.[0]) handleFileSelect(files[0]);
   }, [canUpload, handleFileSelect]);
 
-  // Track when credits info is displayed
   useEffect(() => {
     if (authData.cookiesAvailable && comprobantesInfo) {
       if (typeof window.trackEvent !== 'undefined') {
@@ -125,62 +120,84 @@ const UploadArea = ({
   const renderUploadContent = () => {
     if (!canUpload) {
       return (
-        <>
-          <XCircle className="w-20 h-20 mb-6 text-red-400" />
-          <h3 className="text-xl font-medium text-red-700 mb-3">
-            {!authData.cookiesAvailable ? 'Acceso requerido' : 'Alcanzaste el límite de créditos'}
-          </h3>
-          <p className="text-base text-red-600 mb-4">
-            {!authData.cookiesAvailable
-              ? 'Se requiere de autenticación para subir documentos'
-              : 'Ya usaste todos tus créditos disponibles para leer comprobantes con IA. Para seguir usando la funcionalidad, tenés que cargar más créditos.'
-            }
-          </p>
+        <div className="space-y-5">
+          <div className="flex justify-center">
+            <div className="p-4 bg-red-50 rounded-full">
+              <XCircle className="w-12 h-12 text-red-600" strokeWidth={1.5} />
+            </div>
+          </div>
+          <div className="text-center">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              {!authData.cookiesAvailable ? 'Autenticación Requerida' : 'Alcanzaste el límite de créditos'}
+            </h3>
+            <p className="text-sm text-gray-600 leading-relaxed max-w-sm mx-auto">
+              {!authData.cookiesAvailable
+                ? 'Para utilizar esta funcionalidad, necesita autenticarse en el sistema.'
+                : 'Ya usaste todos tus créditos disponibles para leer comprobantes con IA. Para seguir usando la funcionalidad, tenés que cargar más créditos.'
+              }
+            </p>
+          </div>
           {authData.cookiesAvailable && (
-            <div className="flex gap-3">
+            <div className="flex gap-3 justify-center pt-2">
               <button
                 onClick={() => window.open('#', '_blank')}
-                className="px-6 py-3 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                className="px-5 py-2.5 bg-white text-gray-700 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
               >
-                Conocer más
+                Más Información
               </button>
               <button
                 onClick={() => window.open(addonsUrl, '_self')}
-                className="px-6 py-3 bg-colppy text-white rounded-lg hover:bg-colppy-hover transition-colors font-medium"
+                className="px-5 py-2.5 bg-colppy text-white text-sm font-medium rounded-lg hover:bg-colppy-hover transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-colppy"
               >
                 Obtener más créditos
               </button>
             </div>
           )}
-        </>
+        </div>
       );
     }
 
     return (
-      <>
-        <FileText className={`w-20 h-20 mb-6 transition-colors ${
-          dragActive ? 'text-colppy' : selectedFile ? 'text-green-500' : 'text-gray-400'
-        }`} />
+      <div className="space-y-5">
+        <div className="flex justify-center">
+          <div className={`p-5 rounded-full transition-all duration-200 ${
+            dragActive ? 'bg-purple-50 scale-110' :
+            selectedFile ? 'bg-green-50' : 'bg-gray-50'
+          }`}>
+            <FileText className={`w-14 h-14 transition-colors ${
+              dragActive ? 'text-colppy' :
+              selectedFile ? 'text-green-600' : 'text-gray-400'
+            }`} strokeWidth={1.5} />
+          </div>
+        </div>
 
         {selectedFile ? (
-          <div className="mb-6">
-            <h3 className="text-xl font-medium text-green-700 mb-3">Archivo seleccionado</h3>
-            <p className="text-base text-gray-600 mb-2">{selectedFile.name}</p>
-            <p className="text-sm text-gray-500">({formatFileSize(selectedFile.size)} KB)</p>
+          <div className="space-y-3">
+            <div className="text-center">
+              <div className="inline-flex items-center gap-2 text-green-600 mb-2">
+                <CheckCircle className="w-4 h-4" strokeWidth={2} />
+                <span className="text-sm font-medium">Archivo Seleccionado</span>
+              </div>
+            </div>
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <p className="text-sm font-medium text-gray-900 mb-1 truncate">{selectedFile.name}</p>
+              <p className="text-xs text-gray-500">{formatFileSize(selectedFile.size)} KB · Documento PDF</p>
+            </div>
           </div>
         ) : (
-          <div className="mb-6">
-            <p className="text-base text-gray-600">Arrastrá el archivo o hacé click en el botón para seleccionarlo desde tu computadora.</p>
+          <div className="text-center">
+            <h3 className="text-base font-semibold text-gray-900 mb-1">Seleccionar Documento</h3>
+            <p className="text-sm text-gray-600">Arrastra un archivo PDF o haz clic para seleccionar</p>
           </div>
         )}
 
-        <div className="flex gap-4">
-          <label className={`px-6 py-3 rounded-lg transition-colors cursor-pointer font-medium ${
+        <div className="flex gap-3 pt-2">
+          <label className={`flex-1 text-center px-5 py-3 text-sm font-medium rounded-lg border transition-all cursor-pointer focus-within:ring-2 focus-within:ring-offset-2 ${
             canUpload
-              ? 'bg-gray-600 text-white hover:bg-gray-700'
-              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              ? 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 focus-within:ring-gray-400'
+              : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
           }`}>
-            Seleccionar archivo
+            Seleccionar Archivo
             <input
               type="file"
               accept=".pdf"
@@ -196,73 +213,102 @@ const UploadArea = ({
             <button
               onClick={handleUpload}
               disabled={isUploading}
-              className="px-6 py-3 bg-colppy text-white rounded-lg hover:bg-colppy-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+              className="flex-1 px-5 py-3 bg-colppy text-white text-sm font-medium rounded-lg hover:bg-colppy-hover transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-colppy"
             >
-              {isUploading ? 'Subiendo...' : 'Subir documento'}
+              {isUploading ? 'Procesando...' : 'Subir Documento'}
             </button>
           )}
         </div>
-      </>
+      </div>
     );
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100" data-tour="upload-area">
-      <h2 className="text-xl font-semibold text-gray-800 mb-2 flex items-center">
-        <Upload className="w-6 h-6 mr-2 text-colppy" />
-        Subir Documento
-      </h2>
+    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden" data-tour="upload-area">
+      {/* Header profesional */}
+      <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-b from-gray-50 to-white">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-colppy to-purple-700 rounded-lg shadow-sm">
+            <Upload className="w-5 h-5 text-white" strokeWidth={2} />
+          </div>
+          <div>
+            <h2 className="text-base font-semibold text-gray-900">Subir Documento</h2>
+            <p className="text-xs text-gray-500">Carga tus archivos PDF de forma segura</p>
+          </div>
+        </div>
+      </div>
 
-      <div
-        className={`border-2 border-dashed rounded-lg p-12 text-center transition-all duration-200 ${
-          !canUpload
-            ? 'border-red-300 bg-red-50 opacity-60'
-            : dragActive
-            ? 'border-colppy bg-purple-50'
-            : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
-        } ${isUploading ? 'pointer-events-none opacity-50' : ''}`}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-      >
-        <div className="flex flex-col items-center">
+      {/* Drop Zone */}
+      <div className="p-6">
+        <div
+          className={`relative border-2 border-dashed rounded-xl p-8 transition-all ${
+            !canUpload
+              ? 'border-red-200 bg-red-50/30'
+              : dragActive
+              ? 'border-colppy bg-purple-50/50'
+              : 'border-gray-300 bg-gray-50/50 hover:border-gray-400 hover:bg-gray-100/50'
+          } ${isUploading ? 'pointer-events-none opacity-60' : ''}`}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
           {renderUploadContent()}
         </div>
       </div>
 
-      <div className="mt-2 bg-gray-50 rounded-lg p-4">
-        <div>
-          {!authData.cookiesAvailable && (
-            <div className="text-xs text-red-600 mt-2 bg-red-50 p-2 rounded border border-red-200">
-              <div className="flex items-center">
-                <XCircle className="w-3 h-3 mr-2" />
-                <span className="font-medium">
-                  Funcionalidad deshabilitada: Se requieren cookies de autenticación para operar
-                </span>
+      {/* Credits Info profesional */}
+      <div className="px-6 pb-6">
+        {!authData.cookiesAvailable && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex gap-3">
+              <div className="flex-shrink-0">
+                <Shield className="w-5 h-5 text-red-600" strokeWidth={1.5} />
+              </div>
+              <div>
+                <h4 className="text-sm font-semibold text-red-900 mb-1">Funcionalidad Deshabilitada</h4>
+                <p className="text-xs text-red-700 leading-relaxed">Se requieren credenciales de autenticación válidas para operar esta funcionalidad.</p>
               </div>
             </div>
-          )}
-          {authData.cookiesAvailable && comprobantesInfo && (
-            <div
-              data-tour="credits"
-              className={`text-xs mt-2 p-2 rounded border ${
-                comprobantesInfo.canProcessFacturas
-                  ? 'bg-purple-50 border-purple-200 text-purple-700'
-                  : 'bg-orange-50 border-orange-200 text-orange-700'
-              }`}>
-              <div className="flex items-center justify-between">
-                <span className="font-medium">
-                  Créditos disponibles: {comprobantesInfo.comprobantes_restantes || 0}
-                </span>
-              </div>
-              {comprobantesInfo.comprobantes_comprados && (
-                <div className="text-xs text-gray-500 mt-1">
-                  Total adquiridos: {comprobantesInfo.comprobantes_comprados}
+          </div>
+        )}
+
+        {authData.cookiesAvailable && comprobantesInfo && (
+          <div
+            data-tour="credits"
+            className={`border rounded-lg p-4 ${
+              comprobantesInfo.canProcessFacturas
+                ? 'bg-green-50 border-green-200'
+                : 'bg-orange-50 border-orange-200'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className={`flex items-center justify-center w-10 h-10 rounded-lg ${
+                  comprobantesInfo.canProcessFacturas
+                    ? 'bg-green-100'
+                    : 'bg-orange-100'
+                }`}>
+                  <CheckCircle className={`w-5 h-5 ${
+                    comprobantesInfo.canProcessFacturas ? 'text-green-600' : 'text-orange-600'
+                  }`} strokeWidth={2} />
                 </div>
-              )}
+                <div>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-2xl font-bold text-gray-900">
+                      {comprobantesInfo.comprobantes_restantes || 0}
+                    </span>
+                    <span className="text-xs font-medium text-gray-600">créditos disponibles</span>
+                  </div>
+                  {comprobantesInfo.comprobantes_comprados && (
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      Total adquiridos: {comprobantesInfo.comprobantes_comprados}
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
