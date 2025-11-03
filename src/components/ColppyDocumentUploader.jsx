@@ -117,8 +117,7 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
     }
 
     try {
-      const idEmpresa = window.idEmpresaUsuario || empresaId;
-      const response = await fetch(`${API_BASE_URL}/api/facturas/comprobantes/${idEmpresa}`);
+      const response = await fetch(`${API_BASE_URL}/api/facturas/comprobantes/${empresaId}`);
       if (response.ok) {
         const data = await response.json();
         setComprobantesInfo(data);
@@ -138,8 +137,7 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
     }
 
     try {
-      const idEmpresa = window.idEmpresaUsuario || empresaId;
-      const response = await fetch(`${API_BASE_URL}/api/facturas/empresa/${idEmpresa}`, {
+      const response = await fetch(`${API_BASE_URL}/api/facturas/empresa/${empresaId}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }
       });
