@@ -13,6 +13,7 @@ function getCookie(name) {
 function App() {
   const [empresaId, setEmpresaId] = useState(null);
   const [email, setEmail] = useState(null);
+  const [sessionKey, setSessionKey] = useState(null);
 
   useEffect(() => {
     const fetchEmpresa = async () => {
@@ -26,18 +27,20 @@ function App() {
         },
         credentials: 'include'
       })
-      
+
       const sJson = await sRes.json()
-      const idUltimaEmpresa = sJson.data?.idUltimaEmpresa || sJson.idUltimaEmpresa;
-      const email = sJson.data?.email || sJson.email
+      const idUltimaEmpresa = sJson.data?.companyId || sJson.companyId;
+      const email = sJson.data?.userId || sJson.userId;
+      const sessionKey = sJson.data?.sessionKey || sJson.sessionKey;
       setEmpresaId(idUltimaEmpresa);
       setEmail(email);
+      setSessionKey(sessionKey);
     }
 
     fetchEmpresa()
   }, [])
 
-  return <ColppyDocumentUploaderWrapper empresaId={empresaId} email={email} getCookie={getCookie} />
+  return <ColppyDocumentUploaderWrapper empresaId={empresaId} email={email} sessionKey={sessionKey} getCookie={getCookie} />
 }
 
 export default App

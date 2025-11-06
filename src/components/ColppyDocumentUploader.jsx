@@ -12,7 +12,7 @@ import { convertToBase64 } from '../utils/fileUtils';
 
 
 // Main component
-const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
+const ColppyDocumentUploader = ({ empresaId, email, sessionKey }) => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const ADDONS_URL = import.meta.env.VITE_ADDONS_URL;
   const API_COLPPY_URL = import.meta.env.VITE_API_COLPPY_URL;
@@ -45,7 +45,7 @@ const ColppyDocumentUploader = ({ empresaId, email, getCookie }) => {
   });
 
   // Memoized values
-  const password = useMemo(() => getCookie('loginPasswordCookie') ?? "", [getCookie]);
+  const password = useMemo(() => sessionKey ?? "", [sessionKey]);
   const authData = useMemo(() => {
     const username = email ?? "";
     const cookiesAvailable = Boolean(username && password && empresaId);

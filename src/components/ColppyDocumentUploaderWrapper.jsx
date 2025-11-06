@@ -3,7 +3,7 @@ import ColppyDocumentUploader from './ColppyDocumentUploader';
 import ColppyDocumentUploaderDemo from './ColppyDocumentUploaderDemo';
 import useFeatureFlag from '../hooks/useFeatureFlag';
 
-const ColppyDocumentUploaderWrapper = ({ empresaId, email, getCookie }) => {
+const ColppyDocumentUploaderWrapper = ({ empresaId, email, sessionKey }) => {
   const ADDONS_URL = import.meta.env.VITE_ADDONS_URL;
 
   // Memoizar customProperties para evitar re-renders
@@ -57,7 +57,7 @@ const ColppyDocumentUploaderWrapper = ({ empresaId, email, getCookie }) => {
   }
 
   // Si está habilitado, mostrar componente real
-  return <ColppyDocumentUploader empresaId={empresaId} email={email} getCookie={getCookie} />;
+  return <ColppyDocumentUploader empresaId={empresaId} email={email} sessionKey={sessionKey} />;
 };
 
 export default ColppyDocumentUploaderWrapper;
