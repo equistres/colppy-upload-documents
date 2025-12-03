@@ -37,36 +37,38 @@ async function startRecordingIfAllowed() {
   let attempts = 0;
   const maxAttempts = 40; // 10 segundos máximo
 
-  const checkFlag = setInterval(() => {
+  const checkFlag = () => {
     attempts++;
 
-    if (typeof mixpanel !== 'undefined' && typeof mixpanel.get_flags === 'function') {
-      try {
-        const flagValue = mixpanel.get_flags()['boolfy-session-recording'];
-        console.log('[Mixpanel] Feature flag boolfy-session-recording:', flagValue);
-
-        if (flagValue === 'on' || flagValue === true) {
-          console.log('[Mixpanel] Session recording enabled by feature flag');
-          clearInterval(checkFlag);
-          startRecordingIfAllowed();
-        } else if (flagValue === 'off' || flagValue === false) {
-          console.log('[Mixpanel] Session recording disabled by feature flag');
-          clearInterval(checkFlag);
-        } else if (attempts >= maxAttempts) {
-          console.log('[Mixpanel] Feature flag timeout - recording disabled');
-          clearInterval(checkFlag);
-        }
-      } catch (e) {
-        if (attempts >= maxAttempts) {
-          console.error('[Mixpanel] Error checking feature flag:', e);
-          clearInterval(checkFlag);
-        }
+    // Verificar si mixpanel.flags.is_enabled está disponible
+    if (window.mixpanel?.flags?.is_enabled) {
+      // Esperar unos intentos para que se sincronicen los flags
+      if (attempts < 3) {
+        setTimeout(checkFlag, 250);
+        return;
       }
+
+      window.mixpanel.flags.is_enabled('boolfy-session-recording', false)
+        .then(enabled => {
+          console.log('[Mixpanel] Feature flag boolfy-session-recording:', enabled);
+          if (enabled) {
+            console.log('[Mixpanel] Session recording enabled by feature flag');
+            startRecordingIfAllowed();
+          } else {
+            console.log('[Mixpanel] Session recording disabled by feature flag');
+          }
+        })
+        .catch(error => {
+          console.error('[Mixpanel] Error checking feature flag:', error);
+        });
     } else if (attempts >= maxAttempts) {
-      console.log('[Mixpanel] Mixpanel not ready after timeout - recording disabled');
-      clearInterval(checkFlag);
+      console.log('[Mixpanel] Mixpanel flags not ready after timeout - recording disabled');
+    } else {
+      setTimeout(checkFlag, 250);
     }
-  }, 250);
+  };
+
+  checkFlag();
 })();
 
 // Identificar usuario en Mixpanel e Intercom
