@@ -15,8 +15,8 @@ mixpanel.init('70cdfac3c6917b21c98de14b024a9d2a', {
   autocapture: false
 });
 
-// Session Recording con límite
-(async function startRecordingIfAllowed() {
+// Session Recording con Feature Flag y límite
+async function startRecordingIfAllowed() {
   try {
     const response = await fetch('https://mixpanel-session-counter-production.up.railway.app/api/can-record');
     const data = await response.json();
@@ -30,6 +30,43 @@ mixpanel.init('70cdfac3c6917b21c98de14b024a9d2a', {
   } catch (error) {
     console.error('[Mixpanel] Error checking can-record:', error);
   }
+}
+
+// Esperar a que Mixpanel esté listo y evaluar feature flag
+(function checkFeatureFlagAndRecord() {
+  let attempts = 0;
+  const maxAttempts = 40; // 10 segundos máximo
+
+  const checkFlag = setInterval(() => {
+    attempts++;
+
+    if (typeof mixpanel !== 'undefined' && typeof mixpanel.get_flags === 'function') {
+      try {
+        const flagValue = mixpanel.get_flags()['boolfy-session-recording'];
+        console.log('[Mixpanel] Feature flag boolfy-session-recording:', flagValue);
+
+        if (flagValue === 'on' || flagValue === true) {
+          console.log('[Mixpanel] Session recording enabled by feature flag');
+          clearInterval(checkFlag);
+          startRecordingIfAllowed();
+        } else if (flagValue === 'off' || flagValue === false) {
+          console.log('[Mixpanel] Session recording disabled by feature flag');
+          clearInterval(checkFlag);
+        } else if (attempts >= maxAttempts) {
+          console.log('[Mixpanel] Feature flag timeout - recording disabled');
+          clearInterval(checkFlag);
+        }
+      } catch (e) {
+        if (attempts >= maxAttempts) {
+          console.error('[Mixpanel] Error checking feature flag:', e);
+          clearInterval(checkFlag);
+        }
+      }
+    } else if (attempts >= maxAttempts) {
+      console.log('[Mixpanel] Mixpanel not ready after timeout - recording disabled');
+      clearInterval(checkFlag);
+    }
+  }, 250);
 })();
 
 // Identificar usuario en Mixpanel e Intercom
