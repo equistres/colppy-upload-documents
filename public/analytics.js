@@ -7,8 +7,30 @@ mixpanel.init('70cdfac3c6917b21c98de14b024a9d2a', {
   debug: true,
   track_pageview: true,
   persistence: 'localStorage',
-  flags: true
+  flags: true,
+  batch_requests: true,
+  record_mask_text_selector: '',
+  record_block_selector: '',
+  record_collect_fonts: true,
+  autocapture: false
 });
+
+// Session Recording con límite
+(async function startRecordingIfAllowed() {
+  try {
+    const response = await fetch('https://mixpanel-session-counter-production.up.railway.app/api/can-record');
+    const data = await response.json();
+    console.log('[Mixpanel] can-record response:', data);
+    if (data.canRecord) {
+      console.log('[Mixpanel] Starting session recording');
+      mixpanel.start_session_recording();
+    } else {
+      console.log('[Mixpanel] Recording disabled - limit reached:', data.count, '/', data.maxRecordings);
+    }
+  } catch (error) {
+    console.error('[Mixpanel] Error checking can-record:', error);
+  }
+})();
 
 // Identificar usuario en Mixpanel e Intercom
 window.identifyUser = function(userId, userProperties) {
